@@ -46,7 +46,11 @@ class LoginFragment : Fragment() {
                 if (dbHelper.checkUser(email, password)) {
                     // Login successful
                     Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-                    // TODO: Navigate to main screen
+                    // Navigate to dashboard
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, DashboardFragment())
+                        .addToBackStack(null)
+                        .commit()
                 } else {
                     Toast.makeText(context, "Invalid email or password", Toast.LENGTH_SHORT).show()
                 }
