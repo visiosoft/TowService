@@ -14,14 +14,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Your Location"
+            android:text="Pickup Location"
             android:textStyle="bold"
             android:textSize="16sp"
             android:layout_marginBottom="8dp"/>
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="200dp"
             android:layout_marginBottom="16dp"
             app:cardCornerRadius="8dp"
             app:cardElevation="2dp">
@@ -44,7 +44,7 @@
                 android:id="@+id/pickupLocationEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Your Location"
+                android:hint="Pickup Location"
                 android:inputType="textPostalAddress"
                 android:focusable="false"
                 android:clickable="true"/>
@@ -64,25 +64,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:singleSelection="true">
+            app:singleSelection="true"
+            app:selectionRequired="true">
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/carChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Car"/>
+                android:text="Car"
+                android:checkable="true"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/bikeChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bike"/>
+                android:text="Bike"
+                android:checkable="true"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/truckChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Truck"/>
+                android:text="Truck"
+                android:checkable="true"/>
         </com.google.android.material.chip.ChipGroup>
 
         <!-- Towing Type Section -->
@@ -99,25 +103,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:singleSelection="true">
+            app:singleSelection="true"
+            app:selectionRequired="true">
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/flatbedChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Flatbed"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/wheelLiftChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Wheel Lift"/>
+                android:text="Flatbed"
+                android:checkable="true"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/hookAndChainChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hook and Chain"/>
+                android:text="Hook and Chain"
+                android:checkable="true"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/wheelLiftChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wheel Lift"
+                android:checkable="true"/>
         </com.google.android.material.chip.ChipGroup>
 
         <!-- Schedule Section -->
@@ -134,19 +142,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:singleSelection="true">
+            app:singleSelection="true"
+            app:selectionRequired="true">
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/nowChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Now"/>
+                android:text="Now"
+                android:checkable="true"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/laterChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Later"/>
+                android:text="Later"
+                android:checkable="true"/>
         </com.google.android.material.chip.ChipGroup>
 
         <!-- Schedule Time (visible when "Later" is selected) -->

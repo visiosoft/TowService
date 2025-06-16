@@ -39,12 +39,11 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     
     private var map: GoogleMap? = null
     private var pickupLocation: LatLng? = null
-    private var dropoffLocation: LatLng? = null
     
     private val calendar = Calendar.getInstance()
     private val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     private val timeFormatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
-    private val AUTOCOMPLETE_REQUEST_CODE = 1
+    private val AUTOCOMPLETE_REQUEST_CODE_PICKUP = 1
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private val locationPermissionRequest = registerForActivityResult(
@@ -52,15 +51,12 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     ) { permissions ->
         when {
             permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                // Precise location access granted
                 enableMyLocation()
             }
             permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                // Only approximate location access granted
                 enableMyLocation()
             }
             else -> {
-                // No location access granted
                 Toast.makeText(requireContext(), "Location permission is required for this feature", Toast.LENGTH_LONG).show()
             }
         }
@@ -87,7 +83,7 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         setupMap()
-        setupPickupLocation()
+        setupLocationInputs()
         setupVehicleTypeChips()
         setupTowingTypeChips()
         setupScheduleOptions()
@@ -99,34 +95,25 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
     }
 
-    private fun setupPickupLocation() {
+    private fun setupLocationInputs() {
         binding.pickupLocationEditText.setOnClickListener {
-            // Set up the autocomplete intent
             val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS)
             val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
                 .build(requireContext())
-            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE)
+            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE_PICKUP)
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
+        if (requestCode == AUTOCOMPLETE_REQUEST_CODE_PICKUP) {
             when (resultCode) {
                 AutocompleteActivity.RESULT_OK -> {
                     data?.let {
                         val place = Autocomplete.getPlaceFromIntent(it)
-                        // Update the pickup location
                         pickupLocation = place.latLng
                         binding.pickupLocationEditText.setText(place.address)
-                        
-                        // Update map
-                        pickupLocation?.let { latLng ->
-                            map?.let { googleMap ->
-                                googleMap.clear()
-                                googleMap.addMarker(MarkerOptions().position(latLng).title("Pickup Location"))
-                                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
-                            }
-                        }
+                        updateMap()
+                        updateEstimate()
                     }
                 }
                 AutocompleteActivity.RESULT_ERROR -> {
@@ -218,11 +205,27 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun updateEstimate() {
-        // TODO: Implement fare and time estimation based on:
-        // - Vehicle type
-        // - Towing type
-        binding.estimatedFareTextView.text = "Estimated Fare: $50.00"
-        binding.estimatedTimeTextView.text = "Estimated Time: 30 min"
+        if (pickupLocation != null) {
+            val baseFare = 50.0 // Base fare
+            val vehicleMultiplier = when (binding.vehicleTypeChipGroup.checkedChipId) {
+                R.id.carChip -> 1.0
+                R.id.bikeChip -> 0.8
+                R.id.truckChip -> 1.5
+                else -> 1.0
+            }
+            val towingMultiplier = when (binding.towingTypeChipGroup.checkedChipId) {
+                R.id.flatbedChip -> 1.2
+                R.id.hookAndChainChip -> 1.0
+                R.id.wheelLiftChip -> 1.1
+                else -> 1.0
+            }
+            
+            val totalFare = baseFare * vehicleMultiplier * towingMultiplier
+            val estimatedTime = 30 // Base time in minutes
+            
+            binding.estimatedFareTextView.text = "Estimated Fare: $${String.format("%.2f", totalFare)}"
+            binding.estimatedTimeTextView.text = "Estimated Time: $estimatedTime min"
+        }
     }
 
     private fun validateInputs(): Boolean {
@@ -252,13 +255,9 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED -> {
-                // Precise location access granted
-                Toast.makeText(requireContext(), "Location permission granted", Toast.LENGTH_SHORT).show()
                 enableMyLocation()
             }
             else -> {
-                // No location access granted
-                Toast.makeText(requireContext(), "Requesting location permission...", Toast.LENGTH_SHORT).show()
                 locationPermissionRequest.launch(
                     arrayOf(
                         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -272,111 +271,49 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     private fun enableMyLocation() {
         try {
             map?.isMyLocationEnabled = true
-            // Get last known location
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location ->
-                    if (location != null) {
-                        val currentLatLng = LatLng(location.latitude, location.longitude)
-                        Toast.makeText(requireContext(), "Got location: ${location.latitude}, ${location.longitude}", Toast.LENGTH_SHORT).show()
-                        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
-                    } else {
-                        Toast.makeText(requireContext(), "Location is null, trying to get current location...", Toast.LENGTH_SHORT).show()
-                        // Try to get current location if last location is null
-                        requestCurrentLocation()
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    val currentLatLng = LatLng(location.latitude, location.longitude)
+                    pickupLocation = currentLatLng
+                    updateMap()
+                    
+                    // Get address from coordinates
+                    val geocoder = android.location.Geocoder(requireContext(), Locale.getDefault())
+                    try {
+                        val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                        addresses?.firstOrNull()?.let { address ->
+                            val addressText = address.getAddressLine(0)
+                            binding.pickupLocationEditText.setText(addressText)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
                 }
-                .addOnFailureListener { e ->
-                    Toast.makeText(requireContext(), "Failed to get location: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
+            }
         } catch (e: SecurityException) {
             Toast.makeText(requireContext(), "Location permission not granted", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun requestCurrentLocation() {
-        try {
-            val locationRequest = com.google.android.gms.location.LocationRequest.create().apply {
-                priority = com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
-                interval = 0
-                fastestInterval = 0
-                numUpdates = 1
-            }
-
-            fusedLocationClient.requestLocationUpdates(locationRequest,
-                object : com.google.android.gms.location.LocationCallback() {
-                    override fun onLocationResult(locationResult: com.google.android.gms.location.LocationResult) {
-                        val location = locationResult.lastLocation
-                        if (location != null) {
-                            val currentLatLng = LatLng(location.latitude, location.longitude)
-                            Toast.makeText(requireContext(), "Got current location: ${location.latitude}, ${location.longitude}", Toast.LENGTH_SHORT).show()
-                            map?.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
-                        }
-                        fusedLocationClient.removeLocationUpdates(this)
-                    }
-                },
-                null
-            )
-        } catch (e: SecurityException) {
-            Toast.makeText(requireContext(), "Location permission not granted", Toast.LENGTH_SHORT).show()
+    private fun updateMap() {
+        pickupLocation?.let { latLng ->
+            map?.clear()
+            map?.addMarker(MarkerOptions().position(latLng).title("Pickup Location"))
+            map?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
         }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
-        Toast.makeText(requireContext(), "Map is ready", Toast.LENGTH_SHORT).show()
+        checkLocationPermission()
         
         // Enable zoom controls
         googleMap.uiSettings.isZoomControlsEnabled = true
         googleMap.uiSettings.isMyLocationButtonEnabled = true
         
-        // Get current location and set it as pickup location
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            Toast.makeText(requireContext(), "Location permission granted, getting location...", Toast.LENGTH_SHORT).show()
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location ->
-                    if (location != null) {
-                        val currentLatLng = LatLng(location.latitude, location.longitude)
-                        pickupLocation = currentLatLng
-                        
-                        // Update map
-                        googleMap.clear()
-                        googleMap.addMarker(MarkerOptions().position(currentLatLng).title("Pickup Location"))
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
-                        
-                        // Get address from coordinates
-                        val geocoder = android.location.Geocoder(requireContext(), Locale.getDefault())
-                        try {
-                            val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-                            addresses?.firstOrNull()?.let { address ->
-                                val addressText = address.getAddressLine(0)
-                                binding.pickupLocationEditText.setText(addressText)
-                                Toast.makeText(requireContext(), "Address set: $addressText", Toast.LENGTH_SHORT).show()
-                            }
-                        } catch (e: Exception) {
-                            Toast.makeText(requireContext(), "Failed to get address: ${e.message}", Toast.LENGTH_SHORT).show()
-                            e.printStackTrace()
-                        }
-                    } else {
-                        Toast.makeText(requireContext(), "Location is null, trying to get current location...", Toast.LENGTH_SHORT).show()
-                        requestCurrentLocation()
-                    }
-                }
-                .addOnFailureListener { e ->
-                    Toast.makeText(requireContext(), "Failed to get location: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-        } else {
-            Toast.makeText(requireContext(), "Location permission not granted", Toast.LENGTH_SHORT).show()
-            checkLocationPermission()
-        }
-        
         googleMap.setOnMapClickListener { latLng ->
             pickupLocation = latLng
-            googleMap.clear()
-            googleMap.addMarker(MarkerOptions().position(latLng).title("Pickup Location"))
+            updateMap()
             
             // Get address from coordinates
             val geocoder = android.location.Geocoder(requireContext(), Locale.getDefault())
@@ -385,10 +322,8 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
                 addresses?.firstOrNull()?.let { address ->
                     val addressText = address.getAddressLine(0)
                     binding.pickupLocationEditText.setText(addressText)
-                    Toast.makeText(requireContext(), "New address set: $addressText", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Failed to get address: ${e.message}", Toast.LENGTH_SHORT).show()
                 e.printStackTrace()
             }
         }
