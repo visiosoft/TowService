@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -85,6 +86,13 @@ class DashboardFragment : Fragment(), OnMapReadyCallback {
         } else {
             requestLocationPermission()
         }
+
+        // Enable zoom controls and my location button
+        googleMap.uiSettings.apply {
+            isZoomControlsEnabled = true
+            isMyLocationButtonEnabled = true
+            isCompassEnabled = true
+        }
     }
 
     private fun checkLocationPermission(): Boolean {
@@ -121,14 +129,49 @@ class DashboardFragment : Fragment(), OnMapReadyCallback {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                location?.let {
-                    val currentLatLng = LatLng(location.latitude, location.longitude)
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
-                    // TODO: Fetch nearby trucks based on current location
-                    loadMockNearbyTrucks(currentLatLng)
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location ->
+                    location?.let {
+                        val currentLatLng = LatLng(location.latitude, location.longitude)
+                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
+                        // Load nearby trucks after getting current location
+                        loadMockNearbyTrucks(currentLatLng)
+                    } ?: run {
+                        // If last location is null, request current location
+                        requestCurrentLocation()
+                    }
                 }
+                .addOnFailureListener { e ->
+                    Toast.makeText(requireContext(), "Failed to get location: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
+    private fun requestCurrentLocation() {
+        try {
+            val locationRequest = com.google.android.gms.location.LocationRequest.create().apply {
+                priority = com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
+                interval = 0
+                fastestInterval = 0
+                numUpdates = 1
             }
+
+            fusedLocationClient.requestLocationUpdates(locationRequest,
+                object : com.google.android.gms.location.LocationCallback() {
+                    override fun onLocationResult(locationResult: com.google.android.gms.location.LocationResult) {
+                        val location = locationResult.lastLocation
+                        if (location != null) {
+                            val currentLatLng = LatLng(location.latitude, location.longitude)
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
+                            loadMockNearbyTrucks(currentLatLng)
+                        }
+                        fusedLocationClient.removeLocationUpdates(this)
+                    }
+                },
+                null
+            )
+        } catch (e: SecurityException) {
+            Toast.makeText(requireContext(), "Location permission not granted", Toast.LENGTH_SHORT).show()
         }
     }
 

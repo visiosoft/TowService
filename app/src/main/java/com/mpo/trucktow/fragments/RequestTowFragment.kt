@@ -219,7 +219,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
 
     private fun updateEstimate() {
         // TODO: Implement fare and time estimation based on:
-        // - Distance between pickup and dropoff
         // - Vehicle type
         // - Towing type
         binding.estimatedFareTextView.text = "Estimated Fare: $50.00"
@@ -229,10 +228,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     private fun validateInputs(): Boolean {
         if (pickupLocation == null) {
             Toast.makeText(context, "Please select a pickup location", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        if (dropoffLocation == null) {
-            Toast.makeText(context, "Please select a dropoff location", Toast.LENGTH_SHORT).show()
             return false
         }
         if (binding.vehicleTypeChipGroup.checkedChipId == View.NO_ID) {
