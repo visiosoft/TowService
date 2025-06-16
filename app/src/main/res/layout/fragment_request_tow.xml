@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Pickup Location Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pickup Location"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp">
+
+            <fragment
+                android:id="@+id/pickupMap"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/pickupLocationEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Pickup Location"
+                android:inputType="textPostalAddress"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Drop-off Location Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Drop-off Location"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/dropoffLocationEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Drop-off Location"
+                android:inputType="textPostalAddress"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Vehicle Type Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vehicle Type"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/vehicleTypeChipGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/carChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Car"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/bikeChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bike"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/truckChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Truck"/>
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- Towing Type Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Towing Type"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/towingTypeChipGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/flatbedChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Flatbed"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/hookAndChainChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hook &amp; Chain"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/wheelLiftChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wheel Lift"/>
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- Schedule Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Schedule"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/scheduleChipGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/nowChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Now"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/laterChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Later"/>
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- Schedule Time (visible when "Later" is selected) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/scheduleTimeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/scheduleTimeEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Schedule Time"
+                android:focusable="false"
+                android:clickable="true"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Estimated Fare & Time Section -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Estimated Fare &amp; Time"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:id="@+id/estimatedFareTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Estimated Fare: $0.00"
+                    android:textSize="14sp"/>
+
+                <TextView
+                    android:id="@+id/estimatedTimeTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Estimated Time: 0 min"
+                    android:textSize="14sp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Request Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/requestButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Request Tow Truck"
+            android:padding="12dp"/>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView> 

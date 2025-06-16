@@ -71,7 +71,10 @@ class DashboardFragment : Fragment(), OnMapReadyCallback {
 
     private fun setupRequestButton() {
         binding.requestButton.setOnClickListener {
-            // TODO: Navigate to request screen
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, RequestTowFragment())
+                .addToBackStack(null)
+                .commit()
         }
     }
 
