@@ -26,7 +26,8 @@ import com.mpo.trucktow.R
 import com.mpo.trucktow.models.TowTruck
 
 class HomeFragment : Fragment(), OnMapReadyCallback {
-    private lateinit var map: GoogleMap
+    private var _map: GoogleMap? = null
+    private val map get() = _map!!
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var currentLocation: Location? = null
     private val nearbyTrucks = mutableListOf<TowTruck>()
@@ -61,33 +62,41 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize map
-        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        try {
+            // Initialize map
+            val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
+            mapFragment?.getMapAsync(this)
 
-        // Initialize location services
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+            // Initialize location services
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
-        // Setup UI elements
-        view.findViewById<FloatingActionButton>(R.id.profileButton).setOnClickListener {
-            findNavController().navigate(R.id.action_home_to_profile)
+            // Setup UI elements
+            view.findViewById<FloatingActionButton>(R.id.profileButton)?.setOnClickListener {
+                findNavController().navigate(R.id.action_home_to_profile)
+            }
+
+            view.findViewById<MaterialButton>(R.id.requestTowButton)?.setOnClickListener {
+                findNavController().navigate(R.id.action_home_to_request_tow)
+            }
+
+            // Request location permission
+            checkLocationPermission()
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error initializing map: ${e.message}", Toast.LENGTH_LONG).show()
         }
-
-        view.findViewById<MaterialButton>(R.id.requestTowButton).setOnClickListener {
-            findNavController().navigate(R.id.action_home_to_request_tow)
-        }
-
-        // Request location permission
-        checkLocationPermission()
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        map = googleMap
-        map.uiSettings.isZoomControlsEnabled = true
-        map.uiSettings.isMyLocationButtonEnabled = true
+        try {
+            _map = googleMap
+            map.uiSettings.isZoomControlsEnabled = true
+            map.uiSettings.isMyLocationButtonEnabled = true
 
-        if (hasLocationPermission()) {
-            enableMyLocation()
+            if (hasLocationPermission()) {
+                enableMyLocation()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error setting up map: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -123,63 +132,83 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun enableMyLocation() {
-        if (hasLocationPermission()) {
-            map.isMyLocationEnabled = true
-            getCurrentLocation()
+        try {
+            if (hasLocationPermission() && _map != null) {
+                map.isMyLocationEnabled = true
+                getCurrentLocation()
+            } else {
+                requestLocationPermission()
+            }
+        } catch (e: SecurityException) {
+            Toast.makeText(context, "Location permission is required", Toast.LENGTH_LONG).show()
+            requestLocationPermission()
         }
     }
 
     private fun getCurrentLocation() {
         if (hasLocationPermission()) {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                location?.let {
-                    currentLocation = it
-                    val currentLatLng = LatLng(it.latitude, it.longitude)
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
-                    findNearbyTrucks()
+            try {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    location?.let {
+                        currentLocation = it
+                        val currentLatLng = LatLng(it.latitude, it.longitude)
+                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
+                        findNearbyTrucks()
+                    }
                 }
+            } catch (e: SecurityException) {
+                Toast.makeText(context, "Location permission is required", Toast.LENGTH_LONG).show()
             }
         }
     }
 
     private fun findNearbyTrucks() {
-        // TODO: Implement API call to find nearby tow trucks
-        // For now, we'll add some dummy data
-        val dummyTrucks = listOf(
-            TowTruck(
-                id = "1",
-                name = "John Doe",
-                phoneNumber = "+1234567890",
-                location = LatLng(
-                    currentLocation?.latitude?.plus(0.01) ?: 0.0,
-                    currentLocation?.longitude?.plus(0.01) ?: 0.0
+        try {
+            // TODO: Implement API call to find nearby tow trucks
+            // For now, we'll add some dummy data
+            val dummyTrucks = listOf(
+                TowTruck(
+                    id = "1",
+                    name = "John Doe",
+                    phoneNumber = "+1234567890",
+                    location = LatLng(
+                        currentLocation?.latitude?.plus(0.01) ?: 0.0,
+                        currentLocation?.longitude?.plus(0.01) ?: 0.0
+                    ),
+                    distance = 1.5,
+                    rating = 4.5,
+                    isAvailable = true
                 ),
-                distance = 1.5,
-                rating = 4.5,
-                isAvailable = true
-            ),
-            TowTruck(
-                id = "2",
-                name = "Jane Smith",
-                phoneNumber = "+1987654321",
-                location = LatLng(
-                    currentLocation?.latitude?.minus(0.01) ?: 0.0,
-                    currentLocation?.longitude?.minus(0.01) ?: 0.0
-                ),
-                distance = 2.0,
-                rating = 4.8,
-                isAvailable = true
+                TowTruck(
+                    id = "2",
+                    name = "Jane Smith",
+                    phoneNumber = "+1987654321",
+                    location = LatLng(
+                        currentLocation?.latitude?.minus(0.01) ?: 0.0,
+                        currentLocation?.longitude?.minus(0.01) ?: 0.0
+                    ),
+                    distance = 2.0,
+                    rating = 4.8,
+                    isAvailable = true
+                )
             )
-        )
 
-        // Add markers for each truck
-        dummyTrucks.forEach { truck ->
-            map.addMarker(
-                MarkerOptions()
-                    .position(truck.location)
-                    .title("Tow Truck ${truck.name}")
-                    .snippet("Driver: ${truck.name}")
-            )
+            // Add markers for each truck
+            dummyTrucks.forEach { truck ->
+                map.addMarker(
+                    MarkerOptions()
+                        .position(truck.location)
+                        .title("Tow Truck ${truck.name}")
+                        .snippet("Driver: ${truck.name}")
+                )
+            }
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error showing nearby trucks: ${e.message}", Toast.LENGTH_LONG).show()
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _map = null
     }
 } 

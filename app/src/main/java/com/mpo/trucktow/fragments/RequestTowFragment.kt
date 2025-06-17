@@ -67,7 +67,11 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         
         // Initialize Places
         if (!Places.isInitialized()) {
-            Places.initialize(requireContext(), "YOUR_API_KEY") // Replace with your actual API key
+            val apiKey = requireContext().packageManager.getApplicationInfo(
+                requireContext().packageName,
+                PackageManager.GET_META_DATA
+            ).metaData.getString("com.google.android.geo.API_KEY")
+            Places.initialize(requireContext(), apiKey ?: "")
         }
 
         // Initialize location services
@@ -85,6 +89,10 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupLocationInputs() {
+        // Get current location first
+        getCurrentLocation()
+        
+        // Still allow manual location selection
         binding.pickupLocationEditText.setOnClickListener {
             val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS)
             val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
@@ -181,7 +189,21 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 location?.let {
                     val currentLatLng = LatLng(location.latitude, location.longitude)
+                    pickupLocation = currentLatLng
                     map?.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
+                    
+                    // Get address from coordinates
+                    val geocoder = android.location.Geocoder(requireContext(), java.util.Locale.getDefault())
+                    try {
+                        val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                        addresses?.firstOrNull()?.let { address ->
+                            val addressText = address.getAddressLine(0)
+                            binding.pickupLocationEditText.setText(addressText)
+                            updateMap()
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
         }

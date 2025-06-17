@@ -49,10 +49,9 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
 
     private val vehicle = Vehicle(
         id = "1",
-        type = "Flatbed Tow Truck",
+        model = "Flatbed Tow Truck",
         licensePlate = "ABC123",
-        color = "White",
-        imageUrl = "https://example.com/vehicle.jpg"
+        color = "White"
     )
 
     override fun onCreateView(
@@ -89,7 +88,7 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupVehicleInfo() {
-        binding.vehicleType.text = vehicle.type
+        binding.vehicleType.text = vehicle.model
         binding.vehicleNumber.text = "License: ${vehicle.licensePlate}"
         binding.vehicleColor.text = "Color: ${vehicle.color}"
         // Load vehicle image using your preferred image loading library

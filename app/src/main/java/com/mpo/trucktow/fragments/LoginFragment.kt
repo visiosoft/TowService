@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.mpo.trucktow.R
 import com.mpo.trucktow.database.DatabaseHelper
 import com.google.android.material.button.MaterialButton
@@ -46,11 +47,8 @@ class LoginFragment : Fragment() {
                 if (dbHelper.checkUser(email, password)) {
                     // Login successful
                     Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-                    // Navigate to dashboard
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainer, DashboardFragment())
-                        .addToBackStack(null)
-                        .commit()
+                    // Navigate to home using Navigation component
+                    findNavController().navigate(R.id.action_login_to_home)
                 } else {
                     Toast.makeText(context, "Invalid email or password", Toast.LENGTH_SHORT).show()
                 }
@@ -58,11 +56,8 @@ class LoginFragment : Fragment() {
         }
 
         signupTextView.setOnClickListener {
-            // Navigate to signup fragment
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, SignupFragment())
-                .addToBackStack(null)
-                .commit()
+            // Navigate to signup using Navigation component
+            findNavController().navigate(R.id.action_login_to_signup)
         }
     }
 

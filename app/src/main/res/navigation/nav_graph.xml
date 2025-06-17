@@ -14,7 +14,7 @@
         <action
             android:id="@+id/action_login_to_home"
             app:destination="@id/homeFragment"
-            app:popUpTo="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
     </fragment>
 
@@ -46,7 +46,7 @@
         <action
             android:id="@+id/action_profile_to_login"
             app:destination="@id/loginFragment"
-            app:popUpTo="@id/homeFragment"
+            app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
     </fragment>
 

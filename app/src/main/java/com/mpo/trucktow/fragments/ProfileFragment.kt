@@ -1,19 +1,37 @@
 package com.mpo.trucktow.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import com.mpo.trucktow.R
 import com.mpo.trucktow.databinding.FragmentProfileBinding
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.mpo.trucktow.models.User
+import com.mpo.trucktow.models.Vehicle
 
 class ProfileFragment : Fragment() {
+
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
+
+    // Mock user data - Replace with actual user data from your backend
+    private val user = User(
+        id = "1",
+        name = "John Doe",
+        email = "john.doe@example.com",
+        phoneNumber = "+1234567890",
+        address = "123 Main St, City, State 12345"
+    )
+
+    // Mock vehicle data - Replace with actual vehicle data from your backend
+    private val vehicle = Vehicle(
+        id = "1",
+        model = "Toyota Camry",
+        licensePlate = "ABC123",
+        color = "Silver"
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,67 +44,91 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupBottomNavigation()
-        setupClickListeners()
-        loadUserProfile()
+        
+        setupUserInfo()
+        setupVehicleInfo()
+        setupSettings()
     }
 
-    private fun setupBottomNavigation() {
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.navigation_home -> {
-                    findNavController().navigate(R.id.action_profile_to_login)
-                    true
-                }
-                R.id.navigation_profile -> {
-                    // Already on profile
-                    true
-                }
-                R.id.navigation_settings -> {
-                    // TODO: Navigate to settings
-                    Toast.makeText(context, "Settings coming soon!", Toast.LENGTH_SHORT).show()
-                    true
-                }
-                else -> false
+    private fun setupUserInfo() {
+        binding.userName.text = user.name
+        binding.userEmail.text = user.email
+        binding.phoneNumberInput.setText(user.phoneNumber)
+        binding.addressInput.setText(user.address)
+
+        // Save personal details when changed
+        binding.phoneNumberInput.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                user.phoneNumber = binding.phoneNumberInput.text.toString()
+                saveUserDetails()
             }
         }
-        // Set profile as selected
-        binding.bottomNavigation.selectedItemId = R.id.navigation_profile
+
+        binding.addressInput.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                user.address = binding.addressInput.text.toString()
+                saveUserDetails()
+            }
+        }
     }
 
-    private fun setupClickListeners() {
-        binding.editProfileButton.setOnClickListener {
-            // TODO: Implement edit profile functionality
+    private fun setupVehicleInfo() {
+        binding.vehicleModelInput.setText(vehicle.model)
+        binding.licensePlateInput.setText(vehicle.licensePlate)
+        binding.vehicleColorInput.setText(vehicle.color)
+
+        // Save vehicle details when changed
+        binding.vehicleModelInput.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                vehicle.model = binding.vehicleModelInput.text.toString()
+                saveVehicleDetails()
+            }
         }
 
-        binding.changePasswordButton.setOnClickListener {
-            // TODO: Implement change password functionality
+        binding.licensePlateInput.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                vehicle.licensePlate = binding.licensePlateInput.text.toString()
+                saveVehicleDetails()
+            }
         }
 
-        binding.logoutButton.setOnClickListener {
-            findNavController().navigate(R.id.action_profile_to_login)
+        binding.vehicleColorInput.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                vehicle.color = binding.vehicleColorInput.text.toString()
+                saveVehicleDetails()
+            }
+        }
+    }
+
+    private fun setupSettings() {
+        // Notifications switch
+        binding.notificationsSwitch.setOnCheckedChangeListener { _, isChecked ->
+            // TODO: Implement notifications settings
+            Toast.makeText(context, "Notifications ${if (isChecked) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
         }
 
-        binding.notificationsButton.setOnClickListener {
-            // TODO: Implement notifications functionality
-        }
-
+        // Help button
         binding.helpButton.setOnClickListener {
-            // TODO: Implement help functionality
+            // TODO: Implement help & support
+            Toast.makeText(context, "Help & Support coming soon!", Toast.LENGTH_SHORT).show()
         }
 
-        binding.editImageButton.setOnClickListener {
-            // TODO: Implement profile image edit functionality
+        // Logout button
+        binding.logoutButton.setOnClickListener {
+            // TODO: Implement logout
+            Toast.makeText(context, "Logging out...", Toast.LENGTH_SHORT).show()
+            // Navigate to login screen or clear user session
         }
     }
 
-    private fun loadUserProfile() {
-        // TODO: Load user profile data from your data source
-        // For now, we'll just set some placeholder data
-        binding.profileName.text = "John Doe"
-        binding.profileEmail.text = "john.doe@example.com"
-        binding.phoneNumberInput.setText("+1 (555) 123-4567")
-        binding.addressInput.setText("123 Main St, City, State 12345")
+    private fun saveUserDetails() {
+        // TODO: Implement API call to save user details
+        Toast.makeText(context, "Personal details saved", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun saveVehicleDetails() {
+        // TODO: Implement API call to save vehicle details
+        Toast.makeText(context, "Vehicle details saved", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {
