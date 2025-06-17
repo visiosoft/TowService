@@ -111,21 +111,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Flatbed"
-                android:checkable="true"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/hookAndChainChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Hook and Chain"
-                android:checkable="true"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/wheelLiftChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Wheel Lift"
-                android:checkable="true"/>
+                android:checkable="true"
+                android:checked="true"/>
         </com.google.android.material.chip.ChipGroup>
 
         <!-- Schedule Section -->
@@ -150,71 +137,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Now"
-                android:checkable="true"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/laterChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Later"
-                android:checkable="true"/>
+                android:checkable="true"
+                android:checked="true"/>
         </com.google.android.material.chip.ChipGroup>
-
-        <!-- Schedule Time (visible when "Later" is selected) -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/scheduleTimeLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:visibility="gone"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/scheduleTimeEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Schedule Time"
-                android:focusable="false"
-                android:clickable="true"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Estimated Fare & Time Section -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Estimated Fare &amp; Time"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:layout_marginBottom="8dp"/>
-
-                <TextView
-                    android:id="@+id/estimatedFareTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Estimated Fare: $0.00"
-                    android:textSize="14sp"/>
-
-                <TextView
-                    android:id="@+id/estimatedTimeTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Estimated Time: 0 min"
-                    android:textSize="14sp"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
         <!-- Request Button -->
         <com.google.android.material.button.MaterialButton
