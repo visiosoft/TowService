@@ -44,11 +44,19 @@
         android:name="com.mpo.trucktow.fragments.ProfileFragment"
         android:label="Profile">
         <action
+            android:id="@+id/action_profile_to_settings"
+            app:destination="@id/settingsFragment" />
+        <action
             android:id="@+id/action_profile_to_login"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
     </fragment>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.mpo.trucktow.fragments.SettingsFragment"
+        android:label="Settings" />
 
     <fragment
         android:id="@+id/requestTowFragment"
