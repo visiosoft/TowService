@@ -7,14 +7,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.mpo.trucktow.R
 import com.mpo.trucktow.databinding.FragmentProfileBinding
 import com.mpo.trucktow.models.User
 import com.mpo.trucktow.models.Vehicle
+import com.mpo.trucktow.SessionManager
 
 class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
+    private lateinit var sessionManager: SessionManager
 
     // Mock user data - Replace with actual user data from your backend
     private val user = User(
@@ -44,6 +48,8 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        sessionManager = SessionManager(requireContext())
         
         setupUserInfo()
         setupVehicleInfo()
@@ -115,9 +121,11 @@ class ProfileFragment : Fragment() {
 
         // Logout button
         binding.logoutButton.setOnClickListener {
-            // TODO: Implement logout
-            Toast.makeText(context, "Logging out...", Toast.LENGTH_SHORT).show()
-            // Navigate to login screen or clear user session
+            // Clear saved credentials and logout
+            sessionManager.logout()
+            Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+            // Navigate to login screen
+            findNavController().navigate(R.id.action_profile_to_login)
         }
     }
 

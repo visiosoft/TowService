@@ -19,6 +19,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.mpo.trucktow.R
 import com.mpo.trucktow.adapters.NearbyTrucksAdapter
 import com.mpo.trucktow.databinding.FragmentDashboardBinding
@@ -174,36 +175,84 @@ class DashboardFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun loadMockNearbyTrucks(currentLocation: LatLng) {
-        // Mock data for testing
+        // Mock data for testing with 5 realistic tow trucks
         nearbyTrucks.clear()
         nearbyTrucks.addAll(listOf(
             TowTruck(
                 id = "1",
-                name = "Fast Tow Service",
-                location = LatLng(currentLocation.latitude + 0.01, currentLocation.longitude + 0.01),
-                distance = 0.5,
-                rating = 4.5
+                name = "Mike's Emergency Towing",
+                location = LatLng(currentLocation.latitude + 0.008, currentLocation.longitude + 0.006),
+                distance = 0.8,
+                rating = 4.7,
+                isAvailable = true,
+                vehicleType = "Flatbed Tow Truck",
+                phoneNumber = "+1234567890"
             ),
             TowTruck(
                 id = "2",
-                name = "Reliable Towing",
-                location = LatLng(currentLocation.latitude - 0.01, currentLocation.longitude - 0.01),
-                distance = 0.8,
-                rating = 4.2
+                name = "Quick Response Towing",
+                location = LatLng(currentLocation.latitude - 0.012, currentLocation.longitude + 0.009),
+                distance = 1.2,
+                rating = 4.3,
+                isAvailable = true,
+                vehicleType = "Wheel Lift Tow Truck",
+                phoneNumber = "+1987654321"
+            ),
+            TowTruck(
+                id = "3",
+                name = "Reliable Roadside Rescue",
+                location = LatLng(currentLocation.latitude + 0.015, currentLocation.longitude - 0.011),
+                distance = 1.8,
+                rating = 4.9,
+                isAvailable = true,
+                vehicleType = "Heavy Duty Tow Truck",
+                phoneNumber = "+1555123456"
+            ),
+            TowTruck(
+                id = "4",
+                name = "24/7 Express Towing",
+                location = LatLng(currentLocation.latitude - 0.007, currentLocation.longitude - 0.013),
+                distance = 1.5,
+                rating = 4.1,
+                isAvailable = true,
+                vehicleType = "Standard Tow Truck",
+                phoneNumber = "+1777888999"
+            ),
+            TowTruck(
+                id = "5",
+                name = "Premium Towing Services",
+                location = LatLng(currentLocation.latitude + 0.003, currentLocation.longitude + 0.018),
+                distance = 2.1,
+                rating = 4.6,
+                isAvailable = true,
+                vehicleType = "Flatbed Tow Truck",
+                phoneNumber = "+1444333222"
             )
         ))
         
         nearbyTrucksAdapter.notifyDataSetChanged()
         
-        // Add markers for each truck
-        nearbyTrucks.forEach { truck ->
+        // Add markers for each truck with detailed information and custom colors
+        val markerColors = listOf(
+            BitmapDescriptorFactory.HUE_RED,
+            BitmapDescriptorFactory.HUE_BLUE,
+            BitmapDescriptorFactory.HUE_GREEN,
+            BitmapDescriptorFactory.HUE_ORANGE,
+            BitmapDescriptorFactory.HUE_VIOLET
+        )
+        
+        nearbyTrucks.forEachIndexed { index, truck ->
             map.addMarker(
                 MarkerOptions()
                     .position(truck.location)
                     .title(truck.name)
-                    .snippet("${truck.distance} km away")
+                    .snippet("${truck.distance} km away • ⭐ ${truck.rating} • ${truck.vehicleType}")
+                    .icon(BitmapDescriptorFactory.defaultMarker(markerColors[index]))
             )
         }
+        
+        // Show info message about dummy data
+        Toast.makeText(requireContext(), "Showing 5 dummy tow trucks for testing", Toast.LENGTH_SHORT).show()
     }
 
     override fun onRequestPermissionsResult(

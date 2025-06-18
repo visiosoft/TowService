@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.mpo.trucktow.R
 import com.mpo.trucktow.database.DatabaseHelper
+import com.mpo.trucktow.SessionManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 
@@ -18,6 +19,7 @@ class LoginFragment : Fragment() {
     private lateinit var loginButton: MaterialButton
     private lateinit var signupTextView: View
     private lateinit var dbHelper: DatabaseHelper
+    private lateinit var sessionManager: SessionManager
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,6 +33,7 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         dbHelper = DatabaseHelper(requireContext())
+        sessionManager = SessionManager(requireContext())
         
         // Initialize views
         emailEditText = view.findViewById(R.id.emailEditText)
@@ -45,7 +48,8 @@ class LoginFragment : Fragment() {
 
             if (validateInput(email, password)) {
                 if (dbHelper.checkUser(email, password)) {
-                    // Login successful
+                    // Login successful - save credentials for auto-login
+                    sessionManager.saveLoginCredentials(email, password)
                     Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
                     // Navigate to home using Navigation component
                     findNavController().navigate(R.id.action_login_to_home)

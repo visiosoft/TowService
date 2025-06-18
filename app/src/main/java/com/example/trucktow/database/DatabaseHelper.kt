@@ -26,6 +26,26 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 + COLUMN_NAME + " TEXT,"
                 + COLUMN_PHONE + " TEXT" + ")")
         db.execSQL(createTable)
+        
+        // Add default user credentials
+        addDefaultUser(db)
+    }
+    
+    private fun addDefaultUser(db: SQLiteDatabase) {
+        // Check if default user already exists
+        val cursor = db.query(TABLE_USERS, arrayOf(COLUMN_ID),
+            "$COLUMN_EMAIL = ?", arrayOf("i@gmail.com"), null, null, null)
+        
+        if (cursor.count == 0) {
+            // Insert default user
+            val values = ContentValues()
+            values.put(COLUMN_EMAIL, "i@gmail.com")
+            values.put(COLUMN_PASSWORD, "sajid123")
+            values.put(COLUMN_NAME, "Default User")
+            values.put(COLUMN_PHONE, "+1234567890")
+            db.insert(TABLE_USERS, null, values)
+        }
+        cursor.close()
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {

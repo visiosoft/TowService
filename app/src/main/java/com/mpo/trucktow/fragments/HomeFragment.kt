@@ -18,6 +18,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.button.MaterialButton
@@ -165,43 +166,96 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private fun findNearbyTrucks() {
         try {
             // TODO: Implement API call to find nearby tow trucks
-            // For now, we'll add some dummy data
+            // For now, we'll add some dummy data with 5 realistic tow trucks
             val dummyTrucks = listOf(
                 TowTruck(
                     id = "1",
-                    name = "John Doe",
+                    name = "Mike's Emergency Towing",
                     phoneNumber = "+1234567890",
                     location = LatLng(
-                        currentLocation?.latitude?.plus(0.01) ?: 0.0,
-                        currentLocation?.longitude?.plus(0.01) ?: 0.0
+                        currentLocation?.latitude?.plus(0.008) ?: 0.0,
+                        currentLocation?.longitude?.plus(0.006) ?: 0.0
                     ),
-                    distance = 1.5,
-                    rating = 4.5,
-                    isAvailable = true
+                    distance = 0.8,
+                    rating = 4.7,
+                    isAvailable = true,
+                    vehicleType = "Flatbed Tow Truck"
                 ),
                 TowTruck(
                     id = "2",
-                    name = "Jane Smith",
+                    name = "Quick Response Towing",
                     phoneNumber = "+1987654321",
                     location = LatLng(
-                        currentLocation?.latitude?.minus(0.01) ?: 0.0,
-                        currentLocation?.longitude?.minus(0.01) ?: 0.0
+                        currentLocation?.latitude?.minus(0.012) ?: 0.0,
+                        currentLocation?.longitude?.plus(0.009) ?: 0.0
                     ),
-                    distance = 2.0,
-                    rating = 4.8,
-                    isAvailable = true
+                    distance = 1.2,
+                    rating = 4.3,
+                    isAvailable = true,
+                    vehicleType = "Wheel Lift Tow Truck"
+                ),
+                TowTruck(
+                    id = "3",
+                    name = "Reliable Roadside Rescue",
+                    phoneNumber = "+1555123456",
+                    location = LatLng(
+                        currentLocation?.latitude?.plus(0.015) ?: 0.0,
+                        currentLocation?.longitude?.minus(0.011) ?: 0.0
+                    ),
+                    distance = 1.8,
+                    rating = 4.9,
+                    isAvailable = true,
+                    vehicleType = "Heavy Duty Tow Truck"
+                ),
+                TowTruck(
+                    id = "4",
+                    name = "24/7 Express Towing",
+                    phoneNumber = "+1777888999",
+                    location = LatLng(
+                        currentLocation?.latitude?.minus(0.007) ?: 0.0,
+                        currentLocation?.longitude?.minus(0.013) ?: 0.0
+                    ),
+                    distance = 1.5,
+                    rating = 4.1,
+                    isAvailable = true,
+                    vehicleType = "Standard Tow Truck"
+                ),
+                TowTruck(
+                    id = "5",
+                    name = "Premium Towing Services",
+                    phoneNumber = "+1444333222",
+                    location = LatLng(
+                        currentLocation?.latitude?.plus(0.003) ?: 0.0,
+                        currentLocation?.longitude?.plus(0.018) ?: 0.0
+                    ),
+                    distance = 2.1,
+                    rating = 4.6,
+                    isAvailable = true,
+                    vehicleType = "Flatbed Tow Truck"
                 )
             )
 
-            // Add markers for each truck
-            dummyTrucks.forEach { truck ->
+            // Add markers for each truck with more detailed information and custom icons
+            val markerColors = listOf(
+                BitmapDescriptorFactory.HUE_RED,
+                BitmapDescriptorFactory.HUE_BLUE,
+                BitmapDescriptorFactory.HUE_GREEN,
+                BitmapDescriptorFactory.HUE_ORANGE,
+                BitmapDescriptorFactory.HUE_VIOLET
+            )
+            
+            dummyTrucks.forEachIndexed { index, truck ->
                 map.addMarker(
                     MarkerOptions()
                         .position(truck.location)
-                        .title("Tow Truck ${truck.name}")
-                        .snippet("Driver: ${truck.name}")
+                        .title(truck.name)
+                        .snippet("${truck.distance} km away • ⭐ ${truck.rating} • ${truck.vehicleType}")
+                        .icon(BitmapDescriptorFactory.defaultMarker(markerColors[index]))
                 )
             }
+            
+            // Show info message about dummy data
+            Toast.makeText(context, "Showing 5 dummy tow trucks for testing", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(context, "Error showing nearby trucks: ${e.message}", Toast.LENGTH_LONG).show()
         }

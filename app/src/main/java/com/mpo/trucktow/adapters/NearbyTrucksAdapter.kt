@@ -29,8 +29,8 @@ class NearbyTrucksAdapter(
     override fun onBindViewHolder(holder: TruckViewHolder, position: Int) {
         val truck = trucks[position]
         holder.truckName.text = truck.name
-        holder.truckDistance.text = "${truck.distance} km away"
-        holder.truckRating.text = "Rating: ${truck.rating}"
+        holder.truckDistance.text = "${truck.distance} km away • ${truck.vehicleType}"
+        holder.truckRating.text = "⭐ ${truck.rating}"
         
         holder.selectButton.setOnClickListener {
             onTruckSelected(truck)
