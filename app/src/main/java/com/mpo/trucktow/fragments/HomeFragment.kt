@@ -164,8 +164,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                         val currentLatLng = LatLng(it.latitude, it.longitude)
                         
                         // Load and scale the custom car icon
-                        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.car_icon)
-                        val scaledIcon = Bitmap.createScaledBitmap(bitmap, 48, 48, false)
+                        val carBitmap = BitmapFactory.decodeResource(resources, R.drawable.car_icon)
+                        val largeCarIcon = Bitmap.createScaledBitmap(carBitmap, 120, 120, false)
 
                         // Add or update marker with custom car icon
                         if (userMarker == null) {
@@ -173,7 +173,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                                 MarkerOptions()
                                     .position(currentLatLng)
                                     .title("You")
-                                    .icon(BitmapDescriptorFactory.fromBitmap(scaledIcon))
+                                    .icon(BitmapDescriptorFactory.fromBitmap(largeCarIcon))
+                                    .anchor(0.5f, 1.5f) // This moves icon slightly upward on map
                             )
                             // Move and zoom the map camera to your location (only on first location)
                             map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 17f))

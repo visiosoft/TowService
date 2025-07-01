@@ -178,8 +178,8 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
                     userLocation = LatLng(location.latitude, location.longitude)
                     
                     // Load and scale the custom car icon
-                    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.car_icon)
-                    val scaledIcon = Bitmap.createScaledBitmap(bitmap, 48, 48, false)
+                    val carBitmap = BitmapFactory.decodeResource(resources, R.drawable.car_icon)
+                    val largeCarIcon = Bitmap.createScaledBitmap(carBitmap, 120, 120, false)
 
                     // Add or update marker with custom car icon
                     if (userMarker == null) {
@@ -187,7 +187,8 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
                             MarkerOptions()
                                 .position(userLocation!!)
                                 .title("Your Location")
-                                .icon(BitmapDescriptorFactory.fromBitmap(scaledIcon))
+                                .icon(BitmapDescriptorFactory.fromBitmap(largeCarIcon))
+                                .anchor(0.5f, 1.5f) // This moves icon slightly upward on map
                         )
                     } else {
                         // Update existing marker position
