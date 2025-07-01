@@ -300,22 +300,17 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 )
             )
 
-            // Add markers for each truck with more detailed information and custom icons
-            val markerColors = listOf(
-                BitmapDescriptorFactory.HUE_RED,
-                BitmapDescriptorFactory.HUE_BLUE,
-                BitmapDescriptorFactory.HUE_GREEN,
-                BitmapDescriptorFactory.HUE_ORANGE,
-                BitmapDescriptorFactory.HUE_VIOLET
-            )
+            // Load and scale the custom tow truck icon
+            val towTruckBitmap = BitmapFactory.decodeResource(resources, R.drawable.tow_truck_icon)
+            val scaledTowTruckIcon = Bitmap.createScaledBitmap(towTruckBitmap, 64, 64, false)
             
-            dummyTrucks.forEachIndexed { index, truck ->
+            dummyTrucks.forEach { truck ->
                 val marker = map.addMarker(
                     MarkerOptions()
                         .position(truck.location)
                         .title(truck.name)
                         .snippet("${truck.distance} km away • ⭐ ${truck.rating} • ${truck.vehicleType}")
-                        .icon(BitmapDescriptorFactory.defaultMarker(markerColors[index]))
+                        .icon(BitmapDescriptorFactory.fromBitmap(scaledTowTruckIcon))
                 )
                 marker?.let { truckMarkers.add(it) }
             }
