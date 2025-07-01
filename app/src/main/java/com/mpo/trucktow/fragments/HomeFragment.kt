@@ -302,7 +302,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
             // Load and scale the custom tow truck icon
             val towTruckBitmap = BitmapFactory.decodeResource(resources, R.drawable.tow_truck_icon)
-            val scaledTowTruckIcon = Bitmap.createScaledBitmap(towTruckBitmap, 64, 64, false)
+            val largeTowTruck = Bitmap.createScaledBitmap(towTruckBitmap, 120, 120, false)
             
             dummyTrucks.forEach { truck ->
                 val marker = map.addMarker(
@@ -310,7 +310,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                         .position(truck.location)
                         .title(truck.name)
                         .snippet("${truck.distance} km away • ⭐ ${truck.rating} • ${truck.vehicleType}")
-                        .icon(BitmapDescriptorFactory.fromBitmap(scaledTowTruckIcon))
+                        .icon(BitmapDescriptorFactory.fromBitmap(largeTowTruck))
+                        .anchor(0.5f, 1.5f) // This moves icon slightly upward on map
                 )
                 marker?.let { truckMarkers.add(it) }
             }
