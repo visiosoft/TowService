@@ -231,17 +231,17 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             truckMarkers.clear()
             
             // TODO: Implement API call to find nearby tow trucks
-            // For now, we'll add some dummy data with 5 realistic tow trucks spaced far apart
+            // For now, we'll add some dummy data with 5 realistic tow trucks near your location
             val dummyTrucks = listOf(
                 TowTruck(
                     id = "1",
                     name = "Mike's Emergency Towing",
                     phoneNumber = "+1234567890",
                     location = LatLng(
-                        currentLocation?.latitude?.plus(0.025) ?: 0.0,
-                        currentLocation?.longitude?.plus(0.020) ?: 0.0
+                        currentLocation?.latitude?.plus(0.005) ?: 0.0,
+                        currentLocation?.longitude?.plus(0.004) ?: 0.0
                     ),
-                    distance = 2.5,
+                    distance = 0.5,
                     rating = 4.7,
                     isAvailable = true,
                     vehicleType = "Flatbed Tow Truck"
@@ -251,10 +251,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     name = "Quick Response Towing",
                     phoneNumber = "+1987654321",
                     location = LatLng(
-                        currentLocation?.latitude?.minus(0.030) ?: 0.0,
-                        currentLocation?.longitude?.plus(0.025) ?: 0.0
+                        currentLocation?.latitude?.minus(0.006) ?: 0.0,
+                        currentLocation?.longitude?.plus(0.005) ?: 0.0
                     ),
-                    distance = 3.2,
+                    distance = 0.8,
                     rating = 4.3,
                     isAvailable = true,
                     vehicleType = "Wheel Lift Tow Truck"
@@ -264,10 +264,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     name = "Reliable Roadside Rescue",
                     phoneNumber = "+1555123456",
                     location = LatLng(
-                        currentLocation?.latitude?.plus(0.035) ?: 0.0,
-                        currentLocation?.longitude?.minus(0.028) ?: 0.0
+                        currentLocation?.latitude?.plus(0.007) ?: 0.0,
+                        currentLocation?.longitude?.minus(0.006) ?: 0.0
                     ),
-                    distance = 3.8,
+                    distance = 0.9,
                     rating = 4.9,
                     isAvailable = true,
                     vehicleType = "Heavy Duty Tow Truck"
@@ -277,10 +277,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     name = "24/7 Express Towing",
                     phoneNumber = "+1777888999",
                     location = LatLng(
-                        currentLocation?.latitude?.minus(0.022) ?: 0.0,
-                        currentLocation?.longitude?.minus(0.035) ?: 0.0
+                        currentLocation?.latitude?.minus(0.004) ?: 0.0,
+                        currentLocation?.longitude?.minus(0.007) ?: 0.0
                     ),
-                    distance = 3.5,
+                    distance = 0.7,
                     rating = 4.1,
                     isAvailable = true,
                     vehicleType = "Standard Tow Truck"
@@ -290,10 +290,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     name = "Premium Towing Services",
                     phoneNumber = "+1444333222",
                     location = LatLng(
-                        currentLocation?.latitude?.plus(0.015) ?: 0.0,
-                        currentLocation?.longitude?.plus(0.040) ?: 0.0
+                        currentLocation?.latitude?.plus(0.003) ?: 0.0,
+                        currentLocation?.longitude?.plus(0.008) ?: 0.0
                     ),
-                    distance = 4.1,
+                    distance = 0.6,
                     rating = 4.6,
                     isAvailable = true,
                     vehicleType = "Flatbed Tow Truck"
