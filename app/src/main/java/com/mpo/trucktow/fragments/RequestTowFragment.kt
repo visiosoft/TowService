@@ -41,8 +41,10 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     
     private var map: GoogleMap? = null
     private var pickupLocation: LatLng? = null
+    private var dropLocation: LatLng? = null
     private var userMarker: com.google.android.gms.maps.model.Marker? = null
     private val AUTOCOMPLETE_REQUEST_CODE_PICKUP = 1
+    private val AUTOCOMPLETE_REQUEST_CODE_DROP = 2
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private val locationPermissionRequest = registerForActivityResult(
@@ -101,32 +103,60 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         // Get current location first
         getCurrentLocation()
         
-        // Still allow manual location selection
+        // Setup pickup location input
         binding.pickupLocationEditText.setOnClickListener {
             val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS)
             val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
                 .build(requireContext())
             startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE_PICKUP)
         }
+        
+        // Setup drop location input
+        binding.dropLocationEditText.setOnClickListener {
+            val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS)
+            val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
+                .build(requireContext())
+            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE_DROP)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == AUTOCOMPLETE_REQUEST_CODE_PICKUP) {
-            when (resultCode) {
-                AutocompleteActivity.RESULT_OK -> {
-                    data?.let {
-                        val place = Autocomplete.getPlaceFromIntent(it)
-                        pickupLocation = place.latLng
-                        binding.pickupLocationEditText.setText(place.address)
-                        updateMap()
+        when (requestCode) {
+            AUTOCOMPLETE_REQUEST_CODE_PICKUP -> {
+                when (resultCode) {
+                    AutocompleteActivity.RESULT_OK -> {
+                        data?.let {
+                            val place = Autocomplete.getPlaceFromIntent(it)
+                            pickupLocation = place.latLng
+                            binding.pickupLocationEditText.setText(place.address)
+                            updateMap()
+                        }
+                    }
+                    AutocompleteActivity.RESULT_ERROR -> {
+                        val status = Autocomplete.getStatusFromIntent(data!!)
+                        Toast.makeText(requireContext(), "Error: ${status.statusMessage}", Toast.LENGTH_SHORT).show()
+                    }
+                    AutocompleteActivity.RESULT_CANCELED -> {
+                        // User canceled the operation
                     }
                 }
-                AutocompleteActivity.RESULT_ERROR -> {
-                    val status = Autocomplete.getStatusFromIntent(data!!)
-                    Toast.makeText(requireContext(), "Error: ${status.statusMessage}", Toast.LENGTH_SHORT).show()
-                }
-                AutocompleteActivity.RESULT_CANCELED -> {
-                    // User canceled the operation
+            }
+            AUTOCOMPLETE_REQUEST_CODE_DROP -> {
+                when (resultCode) {
+                    AutocompleteActivity.RESULT_OK -> {
+                        data?.let {
+                            val place = Autocomplete.getPlaceFromIntent(it)
+                            dropLocation = place.latLng
+                            binding.dropLocationEditText.setText(place.address)
+                        }
+                    }
+                    AutocompleteActivity.RESULT_ERROR -> {
+                        val status = Autocomplete.getStatusFromIntent(data!!)
+                        Toast.makeText(requireContext(), "Error: ${status.statusMessage}", Toast.LENGTH_SHORT).show()
+                    }
+                    AutocompleteActivity.RESULT_CANCELED -> {
+                        // User canceled the operation
+                    }
                 }
             }
         }
@@ -158,6 +188,10 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     private fun validateInputs(): Boolean {
         if (pickupLocation == null) {
             Toast.makeText(context, "Please select a pickup location", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        if (dropLocation == null) {
+            Toast.makeText(context, "Please select a drop location", Toast.LENGTH_SHORT).show()
             return false
         }
         if (binding.vehicleTypeChipGroup.checkedChipId == View.NO_ID) {

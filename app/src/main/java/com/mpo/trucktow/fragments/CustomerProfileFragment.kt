@@ -1,10 +1,12 @@
 package com.mpo.trucktow.fragments
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -110,8 +112,63 @@ class CustomerProfileFragment : Fragment() {
     }
 
     private fun updateCurrentLocation() {
-        // TODO: Implement location update
-        binding.currentLocationText.text = "Current location will be updated here"
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // Show loading indicator
+            binding.updateLocationButton.isEnabled = false
+            binding.currentLocationText.text = "Updating location..."
+            
+            try {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    // Get address from coordinates
+                    val geocoder = android.location.Geocoder(requireContext(), java.util.Locale.getDefault())
+                    try {
+                        val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                        addresses?.firstOrNull()?.let { address ->
+                            val addressText = address.getAddressLine(0)
+                            binding.currentLocationText.text = addressText
+                            Toast.makeText(context, "Location updated!", Toast.LENGTH_SHORT).show()
+                        } ?: run {
+                            binding.currentLocationText.text = "Lat: ${location.latitude}, Lng: ${location.longitude}"
+                            Toast.makeText(context, "Location updated!", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        binding.currentLocationText.text = "Lat: ${location.latitude}, Lng: ${location.longitude}"
+                        Toast.makeText(context, "Location updated!", Toast.LENGTH_SHORT).show()
+                    }
+                } ?: run {
+                    binding.currentLocationText.text = "Unable to get current location"
+                    Toast.makeText(context, "Unable to get current location", Toast.LENGTH_SHORT).show()
+                }
+                
+                // Re-enable button
+                binding.updateLocationButton.isEnabled = true
+            }.addOnFailureListener {
+                binding.currentLocationText.text = "Failed to update location"
+                Toast.makeText(context, "Failed to update location", Toast.LENGTH_SHORT).show()
+                binding.updateLocationButton.isEnabled = true
+            }
+            } catch (e: SecurityException) {
+                binding.currentLocationText.text = "Location permission denied"
+                Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
+                binding.updateLocationButton.isEnabled = true
+            }
+        } else {
+            binding.currentLocationText.text = "Location permission required"
+            Toast.makeText(context, "Location permission required", Toast.LENGTH_SHORT).show()
+            // Request location permission
+            requestPermissions(
+                arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
+                1001
+            )
+        }
     }
 
     private fun showChangePasswordDialog() {

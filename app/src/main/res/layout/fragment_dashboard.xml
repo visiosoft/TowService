@@ -10,6 +10,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <!-- Update Location Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/updateLocationButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_location"
+        app:fabSize="normal"
+        app:backgroundTint="@color/design_default_color_primary"
+        app:tint="@android:color/white" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/requestButton"
         android:layout_width="wrap_content"

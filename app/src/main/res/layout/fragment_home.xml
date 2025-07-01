@@ -20,6 +20,18 @@
         android:src="@drawable/ic_profile"
         app:fabSize="normal" />
 
+    <!-- Update Location Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/updateLocationButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_location"
+        app:fabSize="normal"
+        app:backgroundTint="@color/design_default_color_primary"
+        app:tint="@android:color/white" />
+
     <!-- Request Tow Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/requestTowButton"

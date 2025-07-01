@@ -88,6 +88,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 findNavController().navigate(R.id.action_home_to_request_tow)
             }
 
+            view.findViewById<FloatingActionButton>(R.id.updateLocationButton)?.setOnClickListener {
+                updateCurrentLocation()
+            }
+
             // Request location permission
             checkLocationPermission()
         } catch (e: Exception) {
@@ -322,6 +326,46 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             Toast.makeText(context, "Showing 5 dummy tow trucks for testing", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(context, "Error showing nearby trucks: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun updateCurrentLocation() {
+        if (hasLocationPermission()) {
+            // Show loading indicator
+            view?.findViewById<FloatingActionButton>(R.id.updateLocationButton)?.isEnabled = false
+            Toast.makeText(context, "Updating location...", Toast.LENGTH_SHORT).show()
+            
+            // Get fresh location with proper permission check
+            try {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    currentLocation = it
+                    val currentLatLng = LatLng(it.latitude, it.longitude)
+                    
+                    // Update marker position
+                    userMarker?.position = currentLatLng
+                    
+                    // Move camera to new location
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 17f))
+                    
+                    Toast.makeText(context, "Location updated!", Toast.LENGTH_SHORT).show()
+                } ?: run {
+                    Toast.makeText(context, "Unable to get current location", Toast.LENGTH_SHORT).show()
+                }
+                
+                // Re-enable button
+                view?.findViewById<FloatingActionButton>(R.id.updateLocationButton)?.isEnabled = true
+            }.addOnFailureListener {
+                Toast.makeText(context, "Failed to update location", Toast.LENGTH_SHORT).show()
+                view?.findViewById<FloatingActionButton>(R.id.updateLocationButton)?.isEnabled = true
+            }
+            } catch (e: SecurityException) {
+                Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
+                view?.findViewById<FloatingActionButton>(R.id.updateLocationButton)?.isEnabled = true
+            }
+        } else {
+            Toast.makeText(context, "Location permission required", Toast.LENGTH_SHORT).show()
+            requestLocationPermission()
         }
     }
 

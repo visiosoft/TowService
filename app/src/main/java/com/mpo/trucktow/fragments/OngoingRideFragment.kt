@@ -121,6 +121,10 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
             // Show confirmation dialog
             showCancelConfirmationDialog()
         }
+        
+        binding.updateLocationButton.setOnClickListener {
+            updateCurrentLocation()
+        }
     }
 
     private fun showCancelConfirmationDialog() {
@@ -305,6 +309,46 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
             results
         )
         return results[0] / 1000.0 // Convert to kilometers
+    }
+
+    private fun updateCurrentLocation() {
+        if (checkLocationPermission()) {
+            // Show loading indicator
+            binding.updateLocationButton.isEnabled = false
+            Toast.makeText(context, "Updating location...", Toast.LENGTH_SHORT).show()
+            
+            // Get fresh location with proper permission check
+            try {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    userLocation = LatLng(location.latitude, location.longitude)
+                    
+                    // Update marker position
+                    userMarker?.position = userLocation!!
+                    
+                    // Update map markers and camera
+                    updateMapMarkers()
+                    updateEstimatedArrivalTime()
+                    
+                    Toast.makeText(context, "Location updated!", Toast.LENGTH_SHORT).show()
+                } ?: run {
+                    Toast.makeText(context, "Unable to get current location", Toast.LENGTH_SHORT).show()
+                }
+                
+                // Re-enable button
+                binding.updateLocationButton.isEnabled = true
+            }.addOnFailureListener {
+                Toast.makeText(context, "Failed to update location", Toast.LENGTH_SHORT).show()
+                binding.updateLocationButton.isEnabled = true
+            }
+            } catch (e: SecurityException) {
+                Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
+                binding.updateLocationButton.isEnabled = true
+            }
+        } else {
+            Toast.makeText(context, "Location permission required", Toast.LENGTH_SHORT).show()
+            requestLocationPermission()
+        }
     }
 
     override fun onRequestPermissionsResult(
