@@ -3,6 +3,8 @@ package com.mpo.trucktow.fragments
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,11 +14,16 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.mpo.trucktow.R
@@ -35,7 +42,7 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
     private var driverLocation: LatLng? = null
     private var userLocation: LatLng? = null
     private var driverMarker: MarkerOptions? = null
-    private var userMarker: MarkerOptions? = null
+    private var userMarker: com.google.android.gms.maps.model.Marker? = null
     private var locationUpdateJob: Job? = null
 
     // Mock data - Replace with actual data from your backend
@@ -123,6 +130,7 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        map.uiSettings.isMyLocationButtonEnabled = false // Disable default location button
         if (checkLocationPermission()) {
             enableMyLocation()
             startLocationUpdates()
@@ -154,7 +162,7 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            map.isMyLocationEnabled = true
+            map.isMyLocationEnabled = false // Disable default blue dot
             getCurrentLocation()
         }
     }
@@ -168,6 +176,24 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 location?.let {
                     userLocation = LatLng(location.latitude, location.longitude)
+                    
+                    // Load and scale the custom car icon
+                    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.car_icon)
+                    val scaledIcon = Bitmap.createScaledBitmap(bitmap, 48, 48, false)
+
+                    // Add or update marker with custom car icon
+                    if (userMarker == null) {
+                        userMarker = map.addMarker(
+                            MarkerOptions()
+                                .position(userLocation!!)
+                                .title("Your Location")
+                                .icon(BitmapDescriptorFactory.fromBitmap(scaledIcon))
+                        )
+                    } else {
+                        // Update existing marker position
+                        userMarker?.position = userLocation!!
+                    }
+                    
                     updateMapMarkers()
                 }
             }
@@ -175,6 +201,36 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun startLocationUpdates() {
+        // Start real-time location updates for user
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            try {
+                val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000) // Update every 5 seconds
+                    .setMinUpdateDistanceMeters(10f) // Update if moved 10 meters
+                    .build()
+
+                fusedLocationClient.requestLocationUpdates(
+                    locationRequest,
+                    object : LocationCallback() {
+                        override fun onLocationResult(locationResult: LocationResult) {
+                            locationResult.lastLocation?.let { location ->
+                                userLocation = LatLng(location.latitude, location.longitude)
+                                
+                                // Update existing marker position
+                                userMarker?.position = userLocation!!
+                            }
+                        }
+                    },
+                    requireActivity().mainLooper
+                )
+            } catch (e: SecurityException) {
+                Toast.makeText(context, "Location permission is required", Toast.LENGTH_LONG).show()
+            }
+        }
+        
         // In a real app, you would get driver location updates from your backend
         // For demo purposes, we'll simulate driver movement
         locationUpdateJob = CoroutineScope(Dispatchers.Main).launch {
@@ -209,16 +265,9 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun updateMapMarkers() {
-        map.clear()
+        // Don't clear the map to preserve user marker
+        // Only add driver marker if not already present
         
-        // Add user marker
-        userLocation?.let {
-            userMarker = MarkerOptions()
-                .position(it)
-                .title("Your Location")
-            map.addMarker(userMarker!!)
-        }
-
         // Add driver marker
         driverLocation?.let {
             driverMarker = MarkerOptions()
@@ -274,6 +323,7 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        fusedLocationClient.removeLocationUpdates { } // Stop location updates
         locationUpdateJob?.cancel()
         _binding = null
     }

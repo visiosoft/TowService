@@ -3,6 +3,8 @@ package com.mpo.trucktow.fragments
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,11 +14,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.Places
@@ -34,6 +41,7 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     
     private var map: GoogleMap? = null
     private var pickupLocation: LatLng? = null
+    private var userMarker: com.google.android.gms.maps.model.Marker? = null
     private val AUTOCOMPLETE_REQUEST_CODE_PICKUP = 1
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -81,6 +89,7 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         setupLocationInputs()
         setupVehicleTypeChips()
         setupRequestButton()
+        setupUpdateLocationButton()
     }
 
     private fun setupMap() {
@@ -125,7 +134,7 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupVehicleTypeChips() {
-        binding.vehicleTypeChipGroup.setOnCheckedChangeListener { group, checkedId ->
+        binding.vehicleTypeChipGroup.setOnCheckedChangeListener { _, _ ->
             // No need to update estimates anymore
         }
     }
@@ -137,6 +146,12 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
                 Toast.makeText(context, "Request submitted successfully!", Toast.LENGTH_SHORT).show()
                 parentFragmentManager.popBackStack()
             }
+        }
+    }
+
+    private fun setupUpdateLocationButton() {
+        binding.updateLocationButton.setOnClickListener {
+            updateCurrentLocation()
         }
     }
 
@@ -154,6 +169,7 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        map?.uiSettings?.isMyLocationButtonEnabled = false // Disable default location button
         if (checkLocationPermission()) {
             enableMyLocation()
         } else {
@@ -179,8 +195,9 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
 
     private fun enableMyLocation() {
         if (checkLocationPermission()) {
-            map?.isMyLocationEnabled = true
+            map?.isMyLocationEnabled = false // Disable default blue dot
             getCurrentLocation()
+            startLocationUpdates()
         }
     }
 
@@ -190,8 +207,25 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
                 location?.let {
                     val currentLatLng = LatLng(location.latitude, location.longitude)
                     pickupLocation = currentLatLng
-                    map?.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
-                    
+                    // Load and scale the custom car icon
+                    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.car_icon)
+                    val scaledIcon = Bitmap.createScaledBitmap(bitmap, 48, 48, false)
+                    val currentMap = map
+                    if (currentMap != null) {
+                        if (userMarker == null) {
+                            userMarker = currentMap.addMarker(
+                                MarkerOptions()
+                                    .position(currentLatLng)
+                                    .title("You")
+                                    .icon(BitmapDescriptorFactory.fromBitmap(scaledIcon))
+                            )
+                            // Move and zoom the map camera to your location (only on first location)
+                            currentMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 17f))
+                        } else {
+                            // Update existing marker position
+                            userMarker?.position = currentLatLng
+                        }
+                    }
                     // Get address from coordinates
                     val geocoder = android.location.Geocoder(requireContext(), java.util.Locale.getDefault())
                     try {
@@ -204,8 +238,83 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
+                } ?: run {
+                    Toast.makeText(context, "Unable to get current location", Toast.LENGTH_SHORT).show()
                 }
             }
+        }
+    }
+
+    private fun startLocationUpdates() {
+        if (checkLocationPermission()) {
+            try {
+                val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000) // Update every 5 seconds
+                    .setMinUpdateDistanceMeters(10f) // Update if moved 10 meters
+                    .build()
+                fusedLocationClient.requestLocationUpdates(
+                    locationRequest,
+                    object : LocationCallback() {
+                        override fun onLocationResult(locationResult: LocationResult) {
+                            locationResult.lastLocation?.let { location ->
+                                val currentLatLng = LatLng(location.latitude, location.longitude)
+                                pickupLocation = currentLatLng
+                                // Update existing marker position
+                                userMarker?.position = currentLatLng
+                            }
+                        }
+                    },
+                    requireActivity().mainLooper
+                )
+            } catch (e: SecurityException) {
+                Toast.makeText(context, "Location permission is required", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun updateCurrentLocation() {
+        if (checkLocationPermission()) {
+            // Show loading indicator
+            binding.updateLocationButton.isEnabled = false
+            Toast.makeText(context, "Updating location...", Toast.LENGTH_SHORT).show()
+            
+            // Get fresh location
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    val currentLatLng = LatLng(location.latitude, location.longitude)
+                    pickupLocation = currentLatLng
+                    
+                    // Update marker position
+                    userMarker?.position = currentLatLng
+                    
+                    // Move camera to new location
+                    map?.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 17f))
+                    
+                    // Update address
+                    val geocoder = android.location.Geocoder(requireContext(), java.util.Locale.getDefault())
+                    try {
+                        val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                        addresses?.firstOrNull()?.let { address ->
+                            val addressText = address.getAddressLine(0)
+                            binding.pickupLocationEditText.setText(addressText)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    
+                    Toast.makeText(context, "Location updated!", Toast.LENGTH_SHORT).show()
+                } ?: run {
+                    Toast.makeText(context, "Unable to get current location", Toast.LENGTH_SHORT).show()
+                }
+                
+                // Re-enable button
+                binding.updateLocationButton.isEnabled = true
+            }.addOnFailureListener {
+                Toast.makeText(context, "Failed to update location", Toast.LENGTH_SHORT).show()
+                binding.updateLocationButton.isEnabled = true
+            }
+        } else {
+            Toast.makeText(context, "Location permission required", Toast.LENGTH_SHORT).show()
+            requestLocationPermission()
         }
     }
 
@@ -223,6 +332,7 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        fusedLocationClient.removeLocationUpdates(object : LocationCallback() {}) // Stop location updates
         _binding = null
     }
 } 

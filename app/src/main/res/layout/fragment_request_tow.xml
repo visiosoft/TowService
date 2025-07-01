@@ -26,11 +26,29 @@
             app:cardCornerRadius="8dp"
             app:cardElevation="2dp">
 
-            <fragment
-                android:id="@+id/pickupMap"
-                android:name="com.google.android.gms.maps.SupportMapFragment"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent">
+
+                <fragment
+                    android:id="@+id/pickupMap"
+                    android:name="com.google.android.gms.maps.SupportMapFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/updateLocationButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_margin="16dp"
+                    android:src="@drawable/ic_location"
+                    app:fabSize="mini"
+                    app:tint="@android:color/white"
+                    app:backgroundTint="@color/design_default_color_primary"/>
+
+            </RelativeLayout>
 
         </com.google.android.material.card.MaterialCardView>
 
