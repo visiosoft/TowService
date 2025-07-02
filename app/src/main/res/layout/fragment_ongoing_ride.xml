@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -9,28 +9,54 @@
         android:id="@+id/rideMap"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- ETA Display -->
+    <TextView
+        android:id="@+id/estimatedArrivalTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:text="Arriving in 15 mins"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:background="#CC000000"
+        android:padding="12dp"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Update Location Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/updateLocationButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|start"
         android:layout_margin="16dp"
         android:src="@drawable/ic_location"
         app:fabSize="normal"
         app:backgroundTint="@color/design_default_color_primary"
-        app:tint="@android:color/white" />
+        app:tint="@android:color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Driver and Vehicle Info Card -->
+    <!-- Tow Truck Details Card -->
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/towTruckCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top"
         android:layout_margin="16dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp">
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -38,26 +64,30 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Driver Info Section -->
+            <!-- Driver Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
+                android:gravity="center_vertical">
 
-                <com.google.android.material.imageview.ShapeableImageView
+                <!-- Driver Image -->
+                <ImageView
                     android:id="@+id/driverImage"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:scaleType="centerCrop"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
                     android:src="@android:drawable/ic_menu_gallery"
-                    app:shapeAppearanceOverlay="@style/CircleImageView"/>
+                    android:background="@drawable/circle_bg"
+                    android:padding="3dp"
+                    android:elevation="4dp"
+                    android:scaleType="centerCrop"/>
 
+                <!-- Driver Info -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="16dp"
+                    android:layout_marginStart="12dp"
                     android:orientation="vertical">
 
                     <TextView
@@ -65,130 +95,164 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="John Doe"
-                        android:textSize="18sp"
-                        android:textStyle="bold"/>
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="#333"/>
 
                     <TextView
                         android:id="@+id/driverRating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Rating: 4.8"
-                        android:textSize="14sp"/>
+                        android:textSize="12sp"
+                        android:textColor="#666"
+                        android:layout_marginTop="2dp"/>
 
                     <TextView
                         android:id="@+id/driverStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Speed: 25 km/h • Updated: Just now"
-                        android:textColor="@android:color/holo_blue_dark"
-                        android:textSize="12sp"
-                        android:layout_marginTop="4dp"/>
-
-                    <TextView
-                        android:id="@+id/estimatedArrivalTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Arriving in 15 mins"
-                        android:textColor="@android:color/holo_green_dark"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="4dp"/>
-
-                    <TextView
-                        android:id="@+id/distanceInfo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="2.5km away"
-                        android:textColor="@android:color/darker_gray"
-                        android:textSize="12sp"
+                        android:text="25 km/h • Just now"
+                        android:textColor="#1976D2"
+                        android:textSize="11sp"
                         android:layout_marginTop="2dp"/>
                 </LinearLayout>
+
+                <!-- Status Badge -->
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/statusChip"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="On the way"
+                    android:textSize="11sp"
+                    app:chipBackgroundColor="@color/design_default_color_primary"
+                    app:chipStrokeColor="@android:color/white"
+                    app:chipStrokeWidth="1dp"
+                    app:iconStartPadding="4dp"
+                    app:chipIcon="@drawable/ic_tow_truck"
+                    app:chipIconTint="@android:color/white"
+                    app:chipIconSize="14dp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- Communication Buttons Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Contact Driver"
+                    android:textSize="12sp"
+                    android:textColor="#666"
+                    android:textStyle="bold"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/callButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="8dp"
+                    app:icon="@android:drawable/ic_menu_call"
+                    app:iconSize="18dp"
+                    app:cornerRadius="20dp"
+                    app:backgroundTint="#4CAF50"
+                    style="@style/Widget.MaterialComponents.Button"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/messageButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    app:icon="@android:drawable/ic_menu_send"
+                    app:iconSize="18dp"
+                    app:cornerRadius="20dp"
+                    app:backgroundTint="#2196F3"
+                    style="@style/Widget.MaterialComponents.Button"/>
             </LinearLayout>
 
             <!-- Vehicle Info Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
-
-                <ImageView
-                    android:id="@+id/vehicleImage"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@android:drawable/ic_menu_directions"
-                    android:contentDescription="Vehicle Image"/>
+                android:orientation="vertical"
+                android:layout_marginTop="12dp"
+                android:background="#F8F9FA"
+                android:padding="12dp"
+                android:gravity="center_vertical">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    android:orientation="vertical">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_tow_truck"
+                        android:tint="#1976D2"
+                        android:layout_marginEnd="8dp"/>
                     <TextView
                         android:id="@+id/vehicleType"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:text="Flatbed Tow Truck"
-                        android:textSize="16sp"
-                        android:textStyle="bold"/>
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:textColor="#333"/>
 
                     <TextView
                         android:id="@+id/vehicleNumber"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="License: ABC123"
-                        android:textSize="14sp"/>
-
-                    <TextView
-                        android:id="@+id/vehicleColor"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Color: White"
-                        android:textSize="14sp"/>
+                        android:text="ABC123"
+                        android:textSize="12sp"
+                        android:textColor="#666"
+                        android:background="#E3F2FD"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="2dp"/>
                 </LinearLayout>
-            </LinearLayout>
 
-            <!-- Communication Buttons -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/callButton"
-                    android:layout_width="0dp"
+                <TextView
+                    android:id="@+id/vehicleColor"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    android:text="Call"
-                    app:icon="@android:drawable/ic_menu_call"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/messageButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:text="Message"
-                    app:icon="@android:drawable/ic_menu_send"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                    android:text="Color: White"
+                    android:textSize="11sp"
+                    android:textColor="#888"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="26dp"/>
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Cancel Ride Button -->
+    <!-- Cancel Ride Button - Positioned above the card with proper spacing -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/cancelRideButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_margin="16dp"
+        android:layout_width="200dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="16dp"
         android:text="Cancel Ride"
         android:textColor="@android:color/white"
-        app:backgroundTint="@android:color/holo_red_dark"/>
+        android:textSize="16sp"
+        app:backgroundTint="@android:color/holo_red_dark"
+        app:cornerRadius="32dp"
+        app:icon="@android:drawable/ic_menu_close_clear_cancel"
+        app:iconSize="20dp"
+        app:elevation="20dp"
+        android:fontFamily="sans-serif-medium"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="4"
+        app:layout_constraintBottom_toTopOf="@id/towTruckCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout> 
+</androidx.constraintlayout.widget.ConstraintLayout> 

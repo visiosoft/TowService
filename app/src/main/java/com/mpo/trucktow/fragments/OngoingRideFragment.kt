@@ -7,6 +7,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +30,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.Dot
+import com.google.android.gms.maps.model.Gap
 import com.mpo.trucktow.R
 import com.mpo.trucktow.databinding.FragmentOngoingRideBinding
 import com.mpo.trucktow.models.Driver
@@ -58,6 +62,16 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
     private var currentDriverHeading: Float = 0f
     private var lastUpdateTime: Long = 0L
     private var routePolyline: Polyline? = null
+    private var connectionPolyline: Polyline? = null
+    
+    // Real-time update timer
+    private val updateHandler = Handler(Looper.getMainLooper())
+    private val updateRunnable = object : Runnable {
+        override fun run() {
+            updateRealTimeInfo()
+            updateHandler.postDelayed(this, 3000) // Update every 3 seconds
+        }
+    }
 
     // Mock data - Replace with actual data from your backend
     private val driver = Driver(
@@ -113,6 +127,88 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
         setupCancelButton()
         
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        
+        // Start real-time updates
+        startRealTimeUpdates()
+        
+        // For demo purposes, simulate driver movement
+        simulateDriverMovement()
+        
+        // Additional debugging for cancel button
+        view.post {
+            binding.cancelRideButton.visibility = View.VISIBLE
+            binding.cancelRideButton.bringToFront()
+        }
+    }
+    
+    private fun startRealTimeUpdates() {
+        updateHandler.post(updateRunnable)
+    }
+    
+    private fun stopRealTimeUpdates() {
+        updateHandler.removeCallbacks(updateRunnable)
+    }
+    
+    private fun updateRealTimeInfo() {
+        updateEstimatedArrivalTime()
+        updateDriverStatus()
+        updateConnectionLine()
+    }
+    
+    private fun updateConnectionLine() {
+        userLocation?.let { user ->
+            driverLocation?.let { driver ->
+                // Remove previous connection line
+                connectionPolyline?.remove()
+                
+                // Draw new connection line with dotted pattern
+                connectionPolyline = map.addPolyline(
+                    PolylineOptions()
+                        .add(user, driver)
+                        .color(resources.getColor(R.color.purple_700, null))
+                        .width(8f)
+                        .pattern(listOf(Dot(), Gap(15f)))
+                )
+                
+                // Update camera to show both markers with some padding
+                val bounds = com.google.android.gms.maps.model.LatLngBounds.Builder()
+                    .include(user)
+                    .include(driver)
+                    .build()
+                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150))
+            }
+        }
+    }
+    
+    private fun simulateDriverMovement() {
+        // For demo purposes, simulate driver moving towards user
+        val simulationHandler = Handler(Looper.getMainLooper())
+        val simulationRunnable = object : Runnable {
+            private var step = 0
+            override fun run() {
+                userLocation?.let { user ->
+                    // Create a simulated driver location that moves towards the user
+                    val initialDriverLat = user.latitude + 0.01 // Start 1km away
+                    val initialDriverLng = user.longitude + 0.01
+                    
+                    val progress = (step % 20) / 20.0 // 20 steps to reach user
+                    val currentDriverLat = initialDriverLat - (0.01 * progress)
+                    val currentDriverLng = initialDriverLng - (0.01 * progress)
+                    
+                    val simulatedDriverLocation = LatLng(currentDriverLat, currentDriverLng)
+                    val simulatedSpeed = 15f // 15 m/s = ~54 km/h
+                    val simulatedHeading = 225f // Moving towards user
+                    
+                    updateDriverLocation(simulatedDriverLocation, simulatedSpeed, simulatedHeading)
+                    
+                    step++
+                    if (step < 40) { // Continue for 40 steps (2 minutes)
+                        simulationHandler.postDelayed(this, 3000) // Update every 3 seconds
+                    }
+                }
+            }
+        }
+        simulationHandler.postDelayed(simulationRunnable, 2000) // Start after 2 seconds
     }
     
     private fun setupLocationTrackingManager() {
@@ -150,14 +246,16 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
     private fun setupDriverInfo() {
         binding.driverName.text = driver.name
         binding.driverRating.text = "Rating: ${driver.rating}"
+        binding.driverStatus.text = "25 km/h • Just now"
+        binding.statusChip.text = "On the way"
         // Load driver image using your preferred image loading library
         // Glide.with(this).load(driver.imageUrl).into(binding.driverImage)
     }
 
     private fun setupVehicleInfo() {
         binding.vehicleType.text = vehicle.model
-        binding.vehicleNumber.text = "License: ${vehicle.licensePlate}"
-        binding.vehicleColor.text = "Color: ${vehicle.color}"
+        binding.vehicleNumber.text = vehicle.licensePlate
+        binding.vehicleColor.text = vehicle.color
         // Load vehicle image using your preferred image loading library
         // Glide.with(this).load(vehicle.imageUrl).into(binding.vehicleImage)
     }
@@ -182,8 +280,23 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
             showCancelConfirmationDialog()
         }
         
-        binding.updateLocationButton.setOnClickListener {
-            updateCurrentLocation()
+        // Make sure the button is visible and properly positioned
+        binding.cancelRideButton.visibility = View.VISIBLE
+        binding.cancelRideButton.bringToFront()
+        
+        // Add some debugging and ensure proper positioning
+        binding.cancelRideButton.post {
+            binding.cancelRideButton.visibility = View.VISIBLE
+            binding.cancelRideButton.bringToFront()
+            
+            // Force layout update
+            binding.cancelRideButton.requestLayout()
+            
+            // Add a small delay to ensure proper positioning
+            Handler(Looper.getMainLooper()).postDelayed({
+                binding.cancelRideButton.visibility = View.VISIBLE
+                binding.cancelRideButton.bringToFront()
+            }, 100)
         }
     }
 
@@ -286,6 +399,10 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
                                 
                                 // Update existing marker position
                                 userMarker?.position = userLocation!!
+                                
+                                // Update connection line and ETA
+                                updateConnectionLine()
+                                updateEstimatedArrivalTime()
                             }
                         }
                     },
@@ -305,13 +422,14 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
         
         updateMapMarkers()
         updateEstimatedArrivalTime()
-        updateDriverStatus()
+        updateConnectionLine()
     }
     
     private fun updateTruckLocation(location: LatLng, speed: Float, heading: Float) {
         // Update truck location if needed
         updateMapMarkers()
         updateEstimatedArrivalTime()
+        updateConnectionLine()
     }
     
     private fun updateDriverStatus() {
@@ -320,6 +438,19 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
         
         binding.driverStatus.text = "Speed: ${speedKmh} km/h • Updated: $timeAgo"
     }
+    
+    private fun getTimeAgo(timestamp: Long): String {
+        val now = System.currentTimeMillis()
+        val diff = now - timestamp
+        
+        return when {
+            diff < 60000 -> "Just now"
+            diff < 3600000 -> "${diff / 60000}m ago"
+            else -> "${diff / 3600000}h ago"
+        }
+    }
+    
+
 
     private fun updateMapMarkers() {
         // Clear existing driver marker
@@ -346,7 +477,7 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
                 .include(userLocation!!)
                 .include(driverLocation!!)
                 .build()
-            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150))
             // Fetch and draw route
             fetchAndDrawRoute(userLocation!!, driverLocation!!)
         }
@@ -364,9 +495,6 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
                         .color(resources.getColor(R.color.purple_700, null))
                         .width(10f)
                 )
-                // Update ETA and distance in UI
-                binding.estimatedArrivalTime.text = "Arriving in ${result.durationText}"
-                binding.distanceInfo.text = result.distanceText + " away"
             }
         }
     }
@@ -376,15 +504,15 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
             driverLocation?.let { driver ->
                 val distance = calculateDistance(user, driver)
                 val estimatedTimeMinutes = calculateEstimatedTime(distance, currentDriverSpeed)
-                binding.estimatedArrivalTime.text = "Arriving in $estimatedTimeMinutes mins"
                 
-                // Update distance info
-                val distanceText = if (distance < 1) {
-                    "${(distance * 1000).toInt()}m away"
-                } else {
-                    "${String.format("%.1f", distance)}km away"
+                // Format time display
+                val timeDisplay = when {
+                    estimatedTimeMinutes < 1 -> "Less than 1 min"
+                    estimatedTimeMinutes < 60 -> "$estimatedTimeMinutes mins"
+                    else -> "${estimatedTimeMinutes / 60}h ${estimatedTimeMinutes % 60}m"
                 }
-                binding.distanceInfo.text = distanceText
+                
+                binding.estimatedArrivalTime.text = "Arriving in $timeDisplay"
             }
         }
     }
@@ -395,7 +523,7 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
             ((distanceKm / speedKmh) * 60).toInt() // Convert to minutes
         } else {
             (distanceKm * 2).toInt() // Fallback: assume 30 km/h average
-        }
+        }.coerceAtLeast(1) // Minimum 1 minute
     }
 
     private fun calculateDistance(point1: LatLng, point2: LatLng): Double {
@@ -406,57 +534,6 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
             results
         )
         return results[0] / 1000.0 // Convert to kilometers
-    }
-    
-    private fun getTimeAgo(timestamp: Long): String {
-        val now = System.currentTimeMillis()
-        val diff = now - timestamp
-        
-        return when {
-            diff < 60000 -> "Just now"
-            diff < 3600000 -> "${diff / 60000}m ago"
-            else -> "${diff / 3600000}h ago"
-        }
-    }
-
-    private fun updateCurrentLocation() {
-        if (checkLocationPermission()) {
-            // Show loading indicator
-            binding.updateLocationButton.isEnabled = false
-            Toast.makeText(context, "Updating location...", Toast.LENGTH_SHORT).show()
-            
-            // Get fresh location with proper permission check
-            try {
-                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                location?.let {
-                    userLocation = LatLng(location.latitude, location.longitude)
-                    
-                    // Update marker position
-                    userMarker?.position = userLocation!!
-                    
-                    // Update map markers and camera
-                    updateMapMarkers()
-                    updateEstimatedArrivalTime()
-                    
-                    Toast.makeText(context, "Location updated!", Toast.LENGTH_SHORT).show()
-                } ?: run {
-                    Toast.makeText(context, "Unable to get current location", Toast.LENGTH_SHORT).show()
-                }
-                
-                // Re-enable button
-                binding.updateLocationButton.isEnabled = true
-            }.addOnFailureListener {
-                Toast.makeText(context, "Failed to update location", Toast.LENGTH_SHORT).show()
-                binding.updateLocationButton.isEnabled = true
-            }
-            } catch (e: SecurityException) {
-                Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
-                binding.updateLocationButton.isEnabled = true
-            }
-        } else {
-            Toast.makeText(context, "Location permission required", Toast.LENGTH_SHORT).show()
-            requestLocationPermission()
-        }
     }
 
     override fun onRequestPermissionsResult(
@@ -478,6 +555,9 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
         super.onDestroyView()
         fusedLocationClient.removeLocationUpdates { } // Stop location updates
         locationUpdateJob?.cancel()
+        
+        // Stop real-time updates
+        stopRealTimeUpdates()
         
         // Stop tracking service
         locationTrackingManager.stopTrackingDriver(driver.id)

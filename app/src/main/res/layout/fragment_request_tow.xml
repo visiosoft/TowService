@@ -154,7 +154,7 @@
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_location"
-                        android:tint="@color/design_default_color_primary"
+                        app:tint="@color/design_default_color_primary"
                         android:layout_marginEnd="8dp"/>
 
                     <TextView

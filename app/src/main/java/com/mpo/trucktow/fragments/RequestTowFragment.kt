@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -30,6 +32,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.Dot
+import com.google.android.gms.maps.model.Gap
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.Autocomplete
@@ -52,6 +56,10 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     private var pickupMarker: com.google.android.gms.maps.model.Marker? = null
     private var dropMarker: com.google.android.gms.maps.model.Marker? = null
     private var routePolyline: Polyline? = null
+    
+    // Lists to store markers and polylines for cleanup
+    private val markers = mutableListOf<com.google.android.gms.maps.model.Marker>()
+    private val polylines = mutableListOf<Polyline>()
     
     private val AUTOCOMPLETE_REQUEST_CODE_PICKUP = 1
     private val AUTOCOMPLETE_REQUEST_CODE_DROP = 2
@@ -466,15 +474,132 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     private fun setupRequestButton() {
         binding.requestButton.setOnClickListener {
             if (validateInputs()) {
-                // Navigate to ongoing ride fragment with route information
-                navigateToOngoingRide()
+                // Show connection between car and tow truck
+                showCarTowTruckConnection()
+                
+                // Navigate to ongoing ride fragment after a short delay
+                Handler(Looper.getMainLooper()).postDelayed({
+                    navigateToOngoingRide()
+                }, 3000) // 3 seconds delay
             }
         }
     }
     
+    private fun showCarTowTruckConnection() {
+        try {
+            // Get current car location (pickup location)
+            val carLocation = pickupLocation ?: return
+            
+            // Generate a nearby tow truck location (for demo purposes)
+            val towTruckLocation = generateNearbyTowTruckLocation(carLocation)
+            
+            // Calculate time for tow truck to reach car
+            val timeToReach = calculateTimeToReach(carLocation, towTruckLocation)
+            
+            // Add car marker
+            val carMarker = pickupMap?.addMarker(
+                MarkerOptions()
+                    .position(carLocation)
+                    .title("Your Car")
+                    .snippet("Waiting for tow truck")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+            )
+            
+            // Add tow truck marker
+            val towTruckMarker = pickupMap?.addMarker(
+                MarkerOptions()
+                    .position(towTruckLocation)
+                    .title("Tow Truck")
+                    .snippet("Coming to you in $timeToReach")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+            )
+            
+            // Draw connection line between car and tow truck
+            val connectionPolyline = pickupMap?.addPolyline(
+                PolylineOptions()
+                    .add(carLocation, towTruckLocation)
+                    .color(resources.getColor(R.color.purple_700, null))
+                    .width(6f)
+                    .pattern(listOf(Dot(), Gap(20f)))
+            )
+            
+            // Fit camera to show both car and tow truck
+            val bounds = com.google.android.gms.maps.model.LatLngBounds.Builder()
+                .include(carLocation)
+                .include(towTruckLocation)
+                .build()
+            pickupMap?.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
+            
+            // Show connection info
+            binding.routeStatusText.text = "🚗 Tow truck coming in $timeToReach"
+            
+            // Show success message
+            Toast.makeText(requireContext(), "Tow truck dispatched! ETA: $timeToReach", Toast.LENGTH_LONG).show()
+            
+            // Store markers for later removal
+            carMarker?.let { markers.add(it) }
+            towTruckMarker?.let { markers.add(it) }
+            connectionPolyline?.let { polylines.add(it) }
+            
+        } catch (e: Exception) {
+            Log.e("RequestTowFragment", "Error showing car-tow truck connection", e)
+            Toast.makeText(requireContext(), "Error showing connection", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun generateNearbyTowTruckLocation(carLocation: LatLng): LatLng {
+        // Generate a tow truck location within 2-5 km of the car
+        val distanceKm = (Math.random() * 3 + 2).toDouble() // 2-5 km
+        val bearing = Math.random() * 360 // Random direction
+        
+        // Convert to radians
+        val lat1 = Math.toRadians(carLocation.latitude)
+        val lng1 = Math.toRadians(carLocation.longitude)
+        val brng = Math.toRadians(bearing)
+        
+        // Calculate new position
+        val lat2 = Math.asin(
+            Math.sin(lat1) * Math.cos(distanceKm / 6371) +
+            Math.cos(lat1) * Math.sin(distanceKm / 6371) * Math.cos(brng)
+        )
+        val lng2 = lng1 + Math.atan2(
+            Math.sin(brng) * Math.sin(distanceKm / 6371) * Math.cos(lat1),
+            Math.cos(distanceKm / 6371) - Math.sin(lat1) * Math.sin(lat2)
+        )
+        
+        return LatLng(Math.toDegrees(lat2), Math.toDegrees(lng2))
+    }
+    
+    private fun calculateTimeToReach(carLocation: LatLng, towTruckLocation: LatLng): String {
+        val distance = calculateDistance(carLocation, towTruckLocation)
+        val timeMinutes = (distance * 2).toInt().coerceAtLeast(2) // Minimum 2 minutes
+        
+        return when {
+            timeMinutes < 60 -> "${timeMinutes} mins"
+            else -> "${timeMinutes / 60}h ${timeMinutes % 60}m"
+        }
+    }
+    
     private fun navigateToOngoingRide() {
+        // Clear previous markers and polylines
+        clearMapElements()
+        
         // Navigate to ongoing ride fragment
         findNavController().navigate(R.id.ongoingRideFragment)
+    }
+    
+    private fun clearMapElements() {
+        // Remove all markers
+        markers.forEach { it.remove() }
+        markers.clear()
+        
+        // Remove all polylines
+        polylines.forEach { it.remove() }
+        polylines.clear()
+        
+        // Remove route polyline
+        routePolyline?.remove()
+        routePolyline = null
     }
 
     private fun setupUpdateLocationButtons() {
