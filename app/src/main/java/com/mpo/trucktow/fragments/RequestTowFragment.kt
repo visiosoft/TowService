@@ -336,40 +336,18 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             // Create curved route path
             val polylinePoints = createCurvedRoute(pickupLocation!!, dropLocation!!)
             
-            // Display the route
-            displayRoute(polylinePoints, distanceText, timeText, "Fallback Route")
+            // Display the route with cost calculation
+            displayRouteWithCost(polylinePoints, distance, distanceText, timeText, "Fallback Route")
             
         } catch (e: Exception) {
             Log.e("RequestTowFragment", "Error creating fallback route", e)
-            // Last resort - simple straight line
-            createSimpleRoute()
-        }
-    }
-    
-    private fun createSimpleRoute() {
-        try {
-            Log.d("RequestTowFragment", "Creating simple route")
-            
-            val distance = calculateDistance(pickupLocation!!, dropLocation!!)
-            val distanceText = if (distance < 1) {
-                "${(distance * 1000).toInt()}m"
-            } else {
-                "${String.format("%.1f", distance)}km"
-            }
-            
-            val estimatedTimeMinutes = (distance * 2).toInt().coerceAtLeast(1)
-            val timeText = "${estimatedTimeMinutes} mins"
-            
-            val polylinePoints = listOf(pickupLocation!!, dropLocation!!)
-            
-            displayRoute(polylinePoints, distanceText, timeText, "Simple Route")
-            
-        } catch (e: Exception) {
-            Log.e("RequestTowFragment", "Error creating simple route", e)
+            // Last resort - show error
             binding.routeStatusText.text = "Failed to create route"
             Toast.makeText(requireContext(), "Failed to create route", Toast.LENGTH_SHORT).show()
         }
     }
+    
+
     
     private fun displayRoute(polylinePoints: List<LatLng>, distanceText: String, durationText: String, routeType: String) {
         try {
@@ -382,9 +360,13 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
                     .width(8f)
             )
             
+            // Calculate estimated cost
+            val estimatedCost = calculateEstimatedCost(distanceText)
+            
             // Update route information
             binding.distanceText.text = "Distance: $distanceText"
             binding.estimatedTimeText.text = "ETA: $durationText"
+            binding.estimatedCostText.text = "Estimated Cost: $estimatedCost"
             binding.routeStatusText.text = "Route calculated ($routeType)"
             
             // Fit camera to show entire route
@@ -395,9 +377,78 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             pickupMap?.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
             
             // Show success message
-            Toast.makeText(requireContext(), "Route: $distanceText, $durationText", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Route: $distanceText, $durationText, Cost: $estimatedCost", Toast.LENGTH_SHORT).show()
             
-            Log.d("RequestTowFragment", "Route displayed successfully: $distanceText, $durationText")
+            Log.d("RequestTowFragment", "Route displayed successfully: $distanceText, $durationText, Cost: $estimatedCost")
+            
+        } catch (e: Exception) {
+            Log.e("RequestTowFragment", "Error displaying route", e)
+            binding.routeStatusText.text = "Error displaying route"
+            Toast.makeText(requireContext(), "Error displaying route", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun calculateEstimatedCost(distanceText: String): String {
+        return try {
+            val ratePerKm = 3.0 // 3 AED per km
+            
+            // Parse distance from text (e.g., "2.5km" or "1500m")
+            val distanceInKm = when {
+                distanceText.contains("km") -> {
+                    distanceText.replace("km", "").trim().toDouble()
+                }
+                distanceText.contains("m") -> {
+                    distanceText.replace("m", "").trim().toDouble() / 1000.0
+                }
+                else -> {
+                    // Try to parse as number, assume km
+                    distanceText.toDoubleOrNull() ?: 0.0
+                }
+            }
+            
+            val estimatedCost = distanceInKm * ratePerKm
+            
+            // Format cost with 2 decimal places
+            "%.2f AED".format(estimatedCost)
+            
+        } catch (e: Exception) {
+            Log.e("RequestTowFragment", "Error calculating cost", e)
+            "N/A"
+        }
+    }
+    
+    private fun displayRouteWithCost(polylinePoints: List<LatLng>, distanceInKm: Double, distanceText: String, durationText: String, routeType: String) {
+        try {
+            // Draw polyline on pickup map
+            routePolyline?.remove()
+            routePolyline = pickupMap?.addPolyline(
+                PolylineOptions()
+                    .addAll(polylinePoints)
+                    .color(resources.getColor(R.color.purple_700, null))
+                    .width(8f)
+            )
+            
+            // Calculate estimated cost using actual distance value
+            val ratePerKm = 3.0 // 3 AED per km
+            val estimatedCost = "%.2f AED".format(distanceInKm * ratePerKm)
+            
+            // Update route information
+            binding.distanceText.text = "Distance: $distanceText"
+            binding.estimatedTimeText.text = "ETA: $durationText"
+            binding.estimatedCostText.text = "Estimated Cost: $estimatedCost"
+            binding.routeStatusText.text = "Route calculated ($routeType)"
+            
+            // Fit camera to show entire route
+            val bounds = com.google.android.gms.maps.model.LatLngBounds.Builder()
+                .include(pickupLocation!!)
+                .include(dropLocation!!)
+                .build()
+            pickupMap?.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
+            
+            // Show success message
+            Toast.makeText(requireContext(), "Route: $distanceText, $durationText, Cost: $estimatedCost", Toast.LENGTH_SHORT).show()
+            
+            Log.d("RequestTowFragment", "Route displayed successfully: $distanceText, $durationText, Cost: $estimatedCost")
             
         } catch (e: Exception) {
             Log.e("RequestTowFragment", "Error displaying route", e)
@@ -452,36 +503,7 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             }
         }
         
-        // Test route button for debugging
-        binding.testRouteButton.setOnClickListener {
-            if (pickupLocation != null && dropLocation != null) {
-                Log.d("RequestTowFragment", "Test route button clicked")
-                calculateRoute()
-            } else {
-                Toast.makeText(context, "Please set both pickup and drop locations first", Toast.LENGTH_SHORT).show()
-            }
-        }
-        
-        // Add a simple test route button for immediate testing
-        binding.testRouteButton.setOnLongClickListener {
-            if (pickupLocation != null && dropLocation != null) {
-                Log.d("RequestTowFragment", "Long press - creating test route")
-                calculateRoute()
-            } else {
-                Toast.makeText(context, "Please set both pickup and drop locations first", Toast.LENGTH_SHORT).show()
-            }
-            true
-        }
-        
-        // Simple route button for immediate testing
-        binding.simpleRouteButton.setOnClickListener {
-            if (pickupLocation != null && dropLocation != null) {
-                Log.d("RequestTowFragment", "Simple route button clicked")
-                createSimpleRoute()
-            } else {
-                Toast.makeText(context, "Please set both pickup and drop locations first", Toast.LENGTH_SHORT).show()
-            }
-        }
+
     }
 
     private fun validateInputs(): Boolean {
