@@ -364,10 +364,10 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             val estimatedCost = calculateEstimatedCost(distanceText)
             
             // Update route information
-            binding.distanceText.text = "Distance: $distanceText"
-            binding.estimatedTimeText.text = "ETA: $durationText"
-            binding.estimatedCostText.text = "Estimated Cost: $estimatedCost"
-            binding.routeStatusText.text = "Route calculated ($routeType)"
+            binding.distanceText.text = distanceText
+            binding.estimatedTimeText.text = durationText
+            binding.estimatedCostText.text = estimatedCost
+            binding.routeStatusText.text = "✅ Route calculated ($routeType)"
             
             // Fit camera to show entire route
             val bounds = com.google.android.gms.maps.model.LatLngBounds.Builder()
@@ -433,10 +433,10 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             val estimatedCost = "%.2f AED".format(distanceInKm * ratePerKm)
             
             // Update route information
-            binding.distanceText.text = "Distance: $distanceText"
-            binding.estimatedTimeText.text = "ETA: $durationText"
-            binding.estimatedCostText.text = "Estimated Cost: $estimatedCost"
-            binding.routeStatusText.text = "Route calculated ($routeType)"
+            binding.distanceText.text = distanceText
+            binding.estimatedTimeText.text = durationText
+            binding.estimatedCostText.text = estimatedCost
+            binding.routeStatusText.text = "✅ Route calculated ($routeType)"
             
             // Fit camera to show entire route
             val bounds = com.google.android.gms.maps.model.LatLngBounds.Builder()
