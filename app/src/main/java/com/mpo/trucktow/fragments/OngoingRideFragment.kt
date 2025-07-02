@@ -26,11 +26,18 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 import com.mpo.trucktow.R
 import com.mpo.trucktow.databinding.FragmentOngoingRideBinding
 import com.mpo.trucktow.models.Driver
+import com.mpo.trucktow.models.TowTruck
 import com.mpo.trucktow.models.Vehicle
+import com.mpo.trucktow.services.LocationTrackingManager
+import com.mpo.trucktow.services.DirectionsApiHelper
 import kotlinx.coroutines.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 class OngoingRideFragment : Fragment(), OnMapReadyCallback {
 
@@ -39,11 +46,18 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationTrackingManager: LocationTrackingManager
+    
     private var driverLocation: LatLng? = null
     private var userLocation: LatLng? = null
-    private var driverMarker: MarkerOptions? = null
+    private var driverMarker: com.google.android.gms.maps.model.Marker? = null
     private var userMarker: com.google.android.gms.maps.model.Marker? = null
     private var locationUpdateJob: Job? = null
+    
+    private var currentDriverSpeed: Float = 0f
+    private var currentDriverHeading: Float = 0f
+    private var lastUpdateTime: Long = 0L
+    private var routePolyline: Polyline? = null
 
     // Mock data - Replace with actual data from your backend
     private val driver = Driver(
@@ -51,7 +65,11 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
         name = "John Doe",
         rating = 4.8f,
         phoneNumber = "+1234567890",
-        imageUrl = "https://example.com/driver.jpg"
+        imageUrl = "https://example.com/driver.jpg",
+        currentLocation = null,
+        isOnline = true,
+        isOnTrip = true,
+        tripId = "trip_123"
     )
 
     private val vehicle = Vehicle(
@@ -59,6 +77,20 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
         model = "Flatbed Tow Truck",
         licensePlate = "ABC123",
         color = "White"
+    )
+    
+    private val towTruck = TowTruck(
+        id = "truck_1",
+        name = "John's Tow Service",
+        location = LatLng(0.0, 0.0), // Will be updated
+        distance = 0.0,
+        rating = 4.8,
+        isAvailable = false,
+        phoneNumber = "+1234567890",
+        vehicleType = "Flatbed Tow Truck",
+        isTrackingEnabled = true,
+        isOnTrip = true,
+        tripId = "trip_123"
     )
 
     override fun onCreateView(
@@ -73,6 +105,7 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        setupLocationTrackingManager()
         setupMap()
         setupDriverInfo()
         setupVehicleInfo()
@@ -80,6 +113,33 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
         setupCancelButton()
         
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+    }
+    
+    private fun setupLocationTrackingManager() {
+        locationTrackingManager = LocationTrackingManager(requireContext())
+        locationTrackingManager.setOnServiceConnected {
+            // Start tracking the driver and truck
+            locationTrackingManager.startTrackingDriver(driver.id, driver)
+            locationTrackingManager.startTrackingTruck(towTruck.id, towTruck)
+        }
+        
+        locationTrackingManager.setOnDriverLocationUpdate { driverId, location, speed, heading ->
+            updateDriverLocation(location, speed, heading)
+        }
+        
+        locationTrackingManager.setOnTruckLocationUpdate { truckId, location, speed, heading ->
+            updateTruckLocation(location, speed, heading)
+        }
+        
+        locationTrackingManager.setOnServiceError { errorMessage ->
+            Toast.makeText(context, "Location tracking error: $errorMessage", Toast.LENGTH_LONG).show()
+        }
+        
+        // Start the tracking service
+        val serviceStarted = locationTrackingManager.startService()
+        if (!serviceStarted) {
+            Toast.makeText(context, "Failed to start location tracking service. Please check permissions.", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun setupMap() {
@@ -235,52 +295,51 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
                 Toast.makeText(context, "Location permission is required", Toast.LENGTH_LONG).show()
             }
         }
-        
-        // In a real app, you would get driver location updates from your backend
-        // For demo purposes, we'll simulate driver movement
-        locationUpdateJob = CoroutineScope(Dispatchers.Main).launch {
-            while (isActive) {
-                simulateDriverMovement()
-                delay(5000) // Update every 5 seconds
-            }
-        }
     }
-
-    private fun simulateDriverMovement() {
-        // Simulate driver moving towards user
-        userLocation?.let { user ->
-            if (driverLocation == null) {
-                // Initial driver location (random point 2km away)
-                val randomAngle = Math.random() * 2 * Math.PI
-                val distance = 0.02 // 2km in degrees
-                driverLocation = LatLng(
-                    user.latitude + distance * Math.cos(randomAngle),
-                    user.longitude + distance * Math.sin(randomAngle)
-                )
-            } else {
-                // Move driver 10% closer to user
-                driverLocation = LatLng(
-                    driverLocation!!.latitude + (user.latitude - driverLocation!!.latitude) * 0.1,
-                    driverLocation!!.longitude + (user.longitude - driverLocation!!.longitude) * 0.1
-                )
-            }
-            updateMapMarkers()
-            updateEstimatedArrivalTime()
-        }
+    
+    private fun updateDriverLocation(location: LatLng, speed: Float, heading: Float) {
+        driverLocation = location
+        currentDriverSpeed = speed
+        currentDriverHeading = heading
+        lastUpdateTime = System.currentTimeMillis()
+        
+        updateMapMarkers()
+        updateEstimatedArrivalTime()
+        updateDriverStatus()
+    }
+    
+    private fun updateTruckLocation(location: LatLng, speed: Float, heading: Float) {
+        // Update truck location if needed
+        updateMapMarkers()
+        updateEstimatedArrivalTime()
+    }
+    
+    private fun updateDriverStatus() {
+        val speedKmh = (currentDriverSpeed * 3.6).toInt() // Convert m/s to km/h
+        val timeAgo = getTimeAgo(lastUpdateTime)
+        
+        binding.driverStatus.text = "Speed: ${speedKmh} km/h • Updated: $timeAgo"
     }
 
     private fun updateMapMarkers() {
-        // Don't clear the map to preserve user marker
-        // Only add driver marker if not already present
-        
-        // Add driver marker
-        driverLocation?.let {
-            driverMarker = MarkerOptions()
-                .position(it)
-                .title("Driver Location")
-            map.addMarker(driverMarker!!)
+        // Clear existing driver marker
+        driverMarker?.remove()
+        // Remove previous polyline
+        routePolyline?.remove()
+        // Add driver marker with custom icon
+        driverLocation?.let { location ->
+            val truckBitmap = BitmapFactory.decodeResource(resources, R.drawable.tow_truck_icon)
+            val largeTruckIcon = Bitmap.createScaledBitmap(truckBitmap, 120, 120, false)
+            driverMarker = map.addMarker(
+                MarkerOptions()
+                    .position(location)
+                    .title("Driver Location")
+                    .snippet("Speed: ${(currentDriverSpeed * 3.6).toInt()} km/h")
+                    .icon(BitmapDescriptorFactory.fromBitmap(largeTruckIcon))
+                    .rotation(currentDriverHeading)
+                    .anchor(0.5f, 0.5f)
+            )
         }
-
         // Update camera to show both markers
         if (userLocation != null && driverLocation != null) {
             val bounds = com.google.android.gms.maps.model.LatLngBounds.Builder()
@@ -288,6 +347,27 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
                 .include(driverLocation!!)
                 .build()
             map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
+            // Fetch and draw route
+            fetchAndDrawRoute(userLocation!!, driverLocation!!)
+        }
+    }
+
+    private fun fetchAndDrawRoute(origin: LatLng, destination: LatLng) {
+        val apiKey = getString(R.string.google_maps_key)
+        CoroutineScope(Dispatchers.Main).launch {
+            val result = DirectionsApiHelper.getRoute(origin, destination, apiKey)
+            if (result != null) {
+                // Draw polyline
+                routePolyline = map.addPolyline(
+                    PolylineOptions()
+                        .addAll(result.polylinePoints)
+                        .color(resources.getColor(R.color.purple_700, null))
+                        .width(10f)
+                )
+                // Update ETA and distance in UI
+                binding.estimatedArrivalTime.text = "Arriving in ${result.durationText}"
+                binding.distanceInfo.text = result.distanceText + " away"
+            }
         }
     }
 
@@ -295,9 +375,26 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
         userLocation?.let { user ->
             driverLocation?.let { driver ->
                 val distance = calculateDistance(user, driver)
-                val estimatedTimeMinutes = (distance / 0.5).toInt() // Assuming average speed of 30 km/h
+                val estimatedTimeMinutes = calculateEstimatedTime(distance, currentDriverSpeed)
                 binding.estimatedArrivalTime.text = "Arriving in $estimatedTimeMinutes mins"
+                
+                // Update distance info
+                val distanceText = if (distance < 1) {
+                    "${(distance * 1000).toInt()}m away"
+                } else {
+                    "${String.format("%.1f", distance)}km away"
+                }
+                binding.distanceInfo.text = distanceText
             }
+        }
+    }
+    
+    private fun calculateEstimatedTime(distanceKm: Double, speedMs: Float): Int {
+        val speedKmh = speedMs * 3.6 // Convert m/s to km/h
+        return if (speedKmh > 0) {
+            ((distanceKm / speedKmh) * 60).toInt() // Convert to minutes
+        } else {
+            (distanceKm * 2).toInt() // Fallback: assume 30 km/h average
         }
     }
 
@@ -309,6 +406,17 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
             results
         )
         return results[0] / 1000.0 // Convert to kilometers
+    }
+    
+    private fun getTimeAgo(timestamp: Long): String {
+        val now = System.currentTimeMillis()
+        val diff = now - timestamp
+        
+        return when {
+            diff < 60000 -> "Just now"
+            diff < 3600000 -> "${diff / 60000}m ago"
+            else -> "${diff / 3600000}h ago"
+        }
     }
 
     private fun updateCurrentLocation() {
@@ -370,6 +478,12 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
         super.onDestroyView()
         fusedLocationClient.removeLocationUpdates { } // Stop location updates
         locationUpdateJob?.cancel()
+        
+        // Stop tracking service
+        locationTrackingManager.stopTrackingDriver(driver.id)
+        locationTrackingManager.stopTrackingTruck(towTruck.id)
+        locationTrackingManager.stopService()
+        
         _binding = null
     }
 

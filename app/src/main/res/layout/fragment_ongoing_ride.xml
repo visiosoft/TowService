@@ -76,12 +76,32 @@
                         android:textSize="14sp"/>
 
                     <TextView
+                        android:id="@+id/driverStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Speed: 25 km/h • Updated: Just now"
+                        android:textColor="@android:color/holo_blue_dark"
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp"/>
+
+                    <TextView
                         android:id="@+id/estimatedArrivalTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Arriving in 15 mins"
                         android:textColor="@android:color/holo_green_dark"
-                        android:textSize="14sp"/>
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp"/>
+
+                    <TextView
+                        android:id="@+id/distanceInfo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="2.5km away"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="12sp"
+                        android:layout_marginTop="2dp"/>
                 </LinearLayout>
             </LinearLayout>
 

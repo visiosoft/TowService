@@ -10,5 +10,12 @@ data class TowTruck(
     val rating: Double,
     val isAvailable: Boolean = true,
     val phoneNumber: String = "",
-    val vehicleType: String = "Standard Tow Truck"
+    val vehicleType: String = "Standard Tow Truck",
+    val isTrackingEnabled: Boolean = false,
+    val lastLocationUpdate: Long = System.currentTimeMillis(),
+    val estimatedArrivalTime: Long? = null,
+    val currentSpeed: Float = 0f,
+    val heading: Float = 0f,
+    val isOnTrip: Boolean = false,
+    val tripId: String? = null
 ) 

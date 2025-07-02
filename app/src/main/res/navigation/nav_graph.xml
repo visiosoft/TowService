@@ -61,6 +61,15 @@
     <fragment
         android:id="@+id/requestTowFragment"
         android:name="com.mpo.trucktow.fragments.RequestTowFragment"
-        android:label="Request Tow" />
+        android:label="Request Tow">
+        <action
+            android:id="@+id/action_request_tow_to_ongoing_ride"
+            app:destination="@id/ongoingRideFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/ongoingRideFragment"
+        android:name="com.mpo.trucktow.fragments.OngoingRideFragment"
+        android:label="Ongoing Ride" />
 
 </navigation> 

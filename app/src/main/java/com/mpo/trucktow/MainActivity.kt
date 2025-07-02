@@ -1,8 +1,12 @@
 package com.mpo.trucktow
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -18,9 +22,29 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var dbHelper: DatabaseHelper
 
+    // Permission request launcher
+    private val locationPermissionRequest = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        when {
+            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) ||
+            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                // Location permissions granted
+                Toast.makeText(this, "Location permissions granted", Toast.LENGTH_SHORT).show()
+            }
+            else -> {
+                // Location permissions denied
+                Toast.makeText(this, "Location permissions are required for full functionality", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Request permissions at startup
+        requestLocationPermissions()
 
         // Initialize session manager and database helper
         sessionManager = SessionManager(this)
@@ -59,6 +83,22 @@ class MainActivity : AppCompatActivity() {
 
         // Check for auto-login
         checkAutoLogin()
+    }
+
+    private fun requestLocationPermissions() {
+        val permissions = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+        
+        // Check if permissions are already granted
+        val permissionsToRequest = permissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }.toTypedArray()
+        
+        if (permissionsToRequest.isNotEmpty()) {
+            locationPermissionRequest.launch(permissionsToRequest)
+        }
     }
 
     private fun checkAutoLogin() {
