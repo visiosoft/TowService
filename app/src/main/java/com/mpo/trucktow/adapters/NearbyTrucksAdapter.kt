@@ -10,7 +10,8 @@ import com.mpo.trucktow.models.TowTruck
 
 class NearbyTrucksAdapter(
     private val trucks: List<TowTruck>,
-    private val onTruckSelected: (TowTruck) -> Unit
+    private val onTruckSelected: (TowTruck) -> Unit,
+    private val onTruckClicked: (TowTruck) -> Unit
 ) : RecyclerView.Adapter<NearbyTrucksAdapter.TruckViewHolder>() {
 
     class TruckViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -18,6 +19,7 @@ class NearbyTrucksAdapter(
         val truckDistance: TextView = view.findViewById(R.id.truckDistance)
         val truckRating: TextView = view.findViewById(R.id.truckRating)
         val selectButton: View = view.findViewById(R.id.selectButton)
+        val itemView: View = view
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TruckViewHolder {
@@ -34,6 +36,11 @@ class NearbyTrucksAdapter(
         
         holder.selectButton.setOnClickListener {
             onTruckSelected(truck)
+        }
+        
+        // Make the entire item clickable to show details
+        holder.itemView.setOnClickListener {
+            onTruckClicked(truck)
         }
     }
 

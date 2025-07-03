@@ -379,57 +379,7 @@
                 android:checkable="true"/>
         </com.google.android.material.chip.ChipGroup>
 
-        <!-- Towing Type Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Towing Type"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
 
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/towingTypeChipGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:singleSelection="true"
-            app:selectionRequired="true">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/flatbedChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Flatbed"
-                android:checkable="true"
-                android:checked="true"/>
-        </com.google.android.material.chip.ChipGroup>
-
-        <!-- Schedule Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Schedule"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/scheduleChipGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:singleSelection="true"
-            app:selectionRequired="true">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/nowChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Now"
-                android:checkable="true"
-                android:checked="true"/>
-        </com.google.android.material.chip.ChipGroup>
 
         <!-- Request Button -->
         <com.google.android.material.button.MaterialButton

@@ -195,7 +195,7 @@
                         android:layout_width="18dp"
                         android:layout_height="18dp"
                         android:src="@drawable/ic_tow_truck"
-                        android:tint="#1976D2"
+                        app:tint="#1976D2"
                         android:layout_marginEnd="8dp"/>
                     <TextView
                         android:id="@+id/vehicleType"

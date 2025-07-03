@@ -65,6 +65,9 @@
         <action
             android:id="@+id/action_request_tow_to_ongoing_ride"
             app:destination="@id/ongoingRideFragment" />
+        <action
+            android:id="@+id/action_request_tow_to_home"
+            app:destination="@id/homeFragment" />
     </fragment>
 
     <fragment

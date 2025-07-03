@@ -42,6 +42,7 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.mpo.trucktow.R
 import com.mpo.trucktow.databinding.FragmentRequestTowBinding
 import com.mpo.trucktow.services.DirectionsApiHelper
+import com.mpo.trucktow.ui.CountdownDialogFragment
 import kotlinx.coroutines.*
 
 class RequestTowFragment : Fragment(), OnMapReadyCallback {
@@ -107,7 +108,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
 
         setupMaps()
         setupLocationInputs()
-        setupVehicleTypeChips()
         setupRequestButton()
         setupUpdateLocationButtons()
     }
@@ -465,24 +465,70 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun setupVehicleTypeChips() {
-        binding.vehicleTypeChipGroup.setOnCheckedChangeListener { _, _ ->
-            // No need to update estimates anymore
-        }
-    }
+
 
     private fun setupRequestButton() {
         binding.requestButton.setOnClickListener {
             if (validateInputs()) {
-                // Show connection between car and tow truck
-                showCarTowTruckConnection()
-                
-                // Navigate to ongoing ride fragment after a short delay
-                Handler(Looper.getMainLooper()).postDelayed({
-                    navigateToOngoingRide()
-                }, 3000) // 3 seconds delay
+                // Start countdown timer
+                startCountdownTimer()
             }
         }
+    }
+    
+    private fun startCountdownTimer() {
+        // Disable the request button
+        binding.requestButton.isEnabled = false
+        binding.requestButton.text = "Processing..."
+        
+        // Show countdown overlay
+        showCountdownOverlay()
+        
+        // Start 2.5 minute countdown (150 seconds)
+        var timeLeft = 150
+        val countdownHandler = Handler(Looper.getMainLooper())
+        val countdownRunnable = object : Runnable {
+            override fun run() {
+                if (timeLeft > 0) {
+                    updateCountdownText(timeLeft)
+                    timeLeft--
+                    countdownHandler.postDelayed(this, 1000) // Update every second
+                } else {
+                    // Countdown finished, navigate to tow truck selection
+                    hideCountdownOverlay()
+                    navigateToTowTruckSelection()
+                }
+            }
+        }
+        countdownHandler.post(countdownRunnable)
+    }
+    
+    private fun showCountdownOverlay() {
+        // Create and show a countdown dialog
+        val countdownDialog = CountdownDialogFragment()
+        countdownDialog.show(childFragmentManager, "CountdownDialog")
+    }
+    
+    private fun hideCountdownOverlay() {
+        // Hide the countdown dialog
+        val countdownDialog = childFragmentManager.findFragmentByTag("CountdownDialog") as? CountdownDialogFragment
+        countdownDialog?.dismiss()
+    }
+    
+    private fun updateCountdownText(secondsLeft: Int) {
+        val minutes = secondsLeft / 60
+        val seconds = secondsLeft % 60
+        val timeText = String.format("%02d:%02d", minutes, seconds)
+        
+        // Update the countdown dialog text and progress
+        val countdownDialog = childFragmentManager.findFragmentByTag("CountdownDialog") as? CountdownDialogFragment
+        countdownDialog?.updateTime(timeText)
+        countdownDialog?.updateProgress(secondsLeft, 150) // 150 is total seconds
+    }
+    
+    private fun navigateToTowTruckSelection() {
+        // Navigate to dashboard fragment (which shows nearby tow trucks)
+        findNavController().navigate(R.id.action_request_tow_to_home)
     }
     
     private fun showCarTowTruckConnection() {
@@ -638,10 +684,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         }
         if (dropLocation == null) {
             Toast.makeText(context, "Please select a drop location", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        if (binding.vehicleTypeChipGroup.checkedChipId == View.NO_ID) {
-            Toast.makeText(context, "Please select a vehicle type", Toast.LENGTH_SHORT).show()
             return false
         }
         return true

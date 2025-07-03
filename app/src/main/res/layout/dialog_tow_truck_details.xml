@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <!-- Header with Close Button -->
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Tow Truck Details"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#1976D2"
+            android:gravity="center" />
+
+        <ImageView
+            android:id="@+id/closeButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="4dp"
+            android:contentDescription="Close" />
+    </LinearLayout>
+
+    <!-- Tow Truck Info Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/truckInfoCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="8dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.95">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Company Name and Rating -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_tow_truck"
+                        android:background="@drawable/circle_bg"
+                        android:padding="8dp"
+                        app:tint="#1976D2" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/truckCompanyName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mike's Emergency Towing"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#333333" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="4dp">
+
+                        <TextView
+                            android:id="@+id/truckRating"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="⭐ 4.7"
+                            android:textSize="14sp"
+                            android:textColor="#FF9800" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" • "
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
+
+                        <TextView
+                            android:id="@+id/truckDistance"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0.8 km away"
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Status Badge -->
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/availabilityChip"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Available"
+                    android:textSize="11sp"
+                    app:chipBackgroundColor="#4CAF50"
+                    app:chipStrokeColor="@android:color/white"
+                    app:chipStrokeWidth="1dp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Vehicle Details -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:background="#F8F9FA"
+                android:padding="12dp"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_tow_truck"
+                        app:tint="#1976D2"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/vehicleType"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Flatbed Tow Truck"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#333333" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/vehicleCapacity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Capacity: Up to 10,000 lbs"
+                    android:textSize="12sp"
+                    android:textColor="#666666"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="28dp" />
+            </LinearLayout>
+
+            <!-- Contact Information -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Contact Information"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:layout_marginBottom="8dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_menu_call"
+                        app:tint="#1976D2"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/phoneNumber"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="+1 (234) 567-8900"
+                        android:textSize="14sp"
+                        android:textColor="#333333" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/callButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:icon="@android:drawable/ic_menu_call"
+                        app:iconSize="18dp"
+                        app:cornerRadius="20dp"
+                        app:backgroundTint="#4CAF50"
+                        app:iconTint="@android:color/white"
+                        style="@style/Widget.MaterialComponents.Button" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_menu_send"
+                        app:tint="#1976D2"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Send Message"
+                        android:textSize="14sp"
+                        android:textColor="#333333" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/messageButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:icon="@android:drawable/ic_menu_send"
+                        app:iconSize="18dp"
+                        app:cornerRadius="20dp"
+                        app:backgroundTint="#2196F3"
+                        app:iconTint="@android:color/white"
+                        style="@style/Widget.MaterialComponents.Button" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Services Offered -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Services Offered"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:layout_marginBottom="8dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Roadside Assistance"
+                            android:textSize="11sp"
+                            app:chipBackgroundColor="#E3F2FD"
+                            app:chipStrokeColor="#1976D2"
+                            app:chipStrokeWidth="1dp"
+                            android:textColor="#1976D2"
+                            android:layout_marginEnd="8dp" />
+
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Towing"
+                            android:textSize="11sp"
+                            app:chipBackgroundColor="#E3F2FD"
+                            app:chipStrokeColor="#1976D2"
+                            app:chipStrokeWidth="1dp"
+                            android:textColor="#1976D2"
+                            android:layout_marginEnd="8dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Jump Start"
+                            android:textSize="11sp"
+                            app:chipBackgroundColor="#E3F2FD"
+                            app:chipStrokeColor="#1976D2"
+                            app:chipStrokeWidth="1dp"
+                            android:textColor="#1976D2"
+                            android:layout_marginEnd="8dp" />
+
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Fuel Delivery"
+                            android:textSize="11sp"
+                            app:chipBackgroundColor="#E3F2FD"
+                            app:chipStrokeColor="#1976D2"
+                            app:chipStrokeWidth="1dp"
+                            android:textColor="#1976D2"
+                            android:layout_marginEnd="8dp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Reserve Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/reserveButton"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="8dp"
+        android:text="Reserve Tow Truck"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        app:backgroundTint="#4CAF50"
+        app:cornerRadius="28dp"
+        app:elevation="12dp"
+        app:icon="@drawable/ic_tow"
+        app:iconSize="24dp"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        app:layout_constraintTop_toBottomOf="@id/truckInfoCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.95" />
+
+</androidx.constraintlayout.widget.ConstraintLayout> 

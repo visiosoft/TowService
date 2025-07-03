@@ -31,6 +31,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mpo.trucktow.R
 import com.mpo.trucktow.models.TowTruck
+import com.mpo.trucktow.ui.TowTruckDetailsDialog
 
 class HomeFragment : Fragment(), OnMapReadyCallback {
     private var _map: GoogleMap? = null
@@ -40,6 +41,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private var userMarker: com.google.android.gms.maps.model.Marker? = null
     private var truckMarkers = mutableListOf<com.google.android.gms.maps.model.Marker>()
     private var trucksAdded = false
+    private var nearbyTrucks = mutableListOf<TowTruck>()
 
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -104,6 +106,22 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             _map = googleMap
             map.uiSettings.isZoomControlsEnabled = true
             map.uiSettings.isMyLocationButtonEnabled = false // Disable default location button
+
+            // Set up marker click listener
+            googleMap.setOnMarkerClickListener { marker ->
+                // Find the truck corresponding to this marker
+                val truck = nearbyTrucks.find { truck ->
+                    truck.location.latitude == marker.position.latitude && 
+                    truck.location.longitude == marker.position.longitude
+                }
+                
+                truck?.let {
+                    showTruckDetailsDialog(it)
+                    return@setOnMarkerClickListener true // Consume the click
+                }
+                
+                false // Don't consume the click
+            }
 
             if (hasLocationPermission()) {
                 enableMyLocation()
@@ -234,6 +252,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             // Clear any existing truck markers
             truckMarkers.forEach { it.remove() }
             truckMarkers.clear()
+            nearbyTrucks.clear()
             
             // TODO: Implement API call to find nearby tow trucks
             // For now, we'll add some dummy data with 5 realistic tow trucks near your location
@@ -309,6 +328,9 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             val towTruckBitmap = BitmapFactory.decodeResource(resources, R.drawable.tow_truck_icon)
             val largeTowTruck = Bitmap.createScaledBitmap(towTruckBitmap, 120, 120, false)
             
+            // Store trucks in the list and add markers
+            nearbyTrucks.addAll(dummyTrucks)
+            
             dummyTrucks.forEach { truck ->
                 val marker = map.addMarker(
                     MarkerOptions()
@@ -327,6 +349,16 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         } catch (e: Exception) {
             Toast.makeText(context, "Error showing nearby trucks: ${e.message}", Toast.LENGTH_LONG).show()
         }
+    }
+
+    private fun showTruckDetailsDialog(truck: TowTruck) {
+        val dialog = TowTruckDetailsDialog.newInstance(truck) { selectedTruck ->
+            // Handle reserve button click
+            Toast.makeText(context, "Reserving ${selectedTruck.name}...", Toast.LENGTH_SHORT).show()
+            // Navigate to request tow fragment with selected truck
+            findNavController().navigate(R.id.action_home_to_request_tow)
+        }
+        dialog.show(childFragmentManager, "TruckDetailsDialog")
     }
 
     private fun updateCurrentLocation() {

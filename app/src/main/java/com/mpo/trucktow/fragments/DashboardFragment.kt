@@ -24,6 +24,7 @@ import com.mpo.trucktow.R
 import com.mpo.trucktow.adapters.NearbyTrucksAdapter
 import com.mpo.trucktow.databinding.FragmentDashboardBinding
 import com.mpo.trucktow.models.TowTruck
+import com.mpo.trucktow.ui.TowTruckDetailsDialog
 
 class DashboardFragment : Fragment(), OnMapReadyCallback {
 
@@ -61,10 +62,17 @@ class DashboardFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupRecyclerView() {
-        nearbyTrucksAdapter = NearbyTrucksAdapter(nearbyTrucks) { truck ->
-            // Handle truck selection
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(truck.location, 15f))
-        }
+        nearbyTrucksAdapter = NearbyTrucksAdapter(
+            nearbyTrucks,
+            onTruckSelected = { truck ->
+                // Handle truck selection - move camera to truck location
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(truck.location, 15f))
+            },
+            onTruckClicked = { truck ->
+                // Handle truck click - show details popup
+                showTruckDetailsDialog(truck)
+            }
+        )
         
         binding.nearbyTrucksRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
@@ -95,6 +103,22 @@ class DashboardFragment : Fragment(), OnMapReadyCallback {
             isZoomControlsEnabled = true
             isMyLocationButtonEnabled = true
             isCompassEnabled = true
+        }
+        
+        // Set up marker click listener
+        googleMap.setOnMarkerClickListener { marker ->
+            // Find the truck corresponding to this marker
+            val truck = nearbyTrucks.find { truck ->
+                truck.location.latitude == marker.position.latitude && 
+                truck.location.longitude == marker.position.longitude
+            }
+            
+            truck?.let {
+                showTruckDetailsDialog(it)
+                return@setOnMarkerClickListener true // Consume the click
+            }
+            
+            false // Don't consume the click
         }
     }
 
@@ -257,6 +281,16 @@ class DashboardFragment : Fragment(), OnMapReadyCallback {
         
         // Show info message about dummy data
         Toast.makeText(requireContext(), "Showing 5 dummy tow trucks for testing", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showTruckDetailsDialog(truck: TowTruck) {
+        val dialog = TowTruckDetailsDialog.newInstance(truck) { selectedTruck ->
+            // Handle reserve button click
+            Toast.makeText(context, "Reserving ${selectedTruck.name}...", Toast.LENGTH_SHORT).show()
+            // Navigate to request tow fragment with selected truck
+            findNavController().navigate(R.id.action_home_to_request_tow)
+        }
+        dialog.show(childFragmentManager, "TruckDetailsDialog")
     }
 
     private fun updateCurrentLocation() {

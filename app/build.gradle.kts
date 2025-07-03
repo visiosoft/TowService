@@ -1,4 +1,5 @@
 plugins {
+    id("kotlin-parcelize")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
@@ -80,6 +81,13 @@ dependencies {
     
     // Google Places
     implementation("com.google.android.libraries.places:places:3.3.0")
+    
+    // Navigation
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
+    
+    // RecyclerView
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
