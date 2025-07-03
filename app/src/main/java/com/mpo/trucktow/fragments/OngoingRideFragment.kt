@@ -72,6 +72,11 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
             updateHandler.postDelayed(this, 3000) // Update every 3 seconds
         }
     }
+    
+    // Simulation handler for demo
+    private var simulationHandler: Handler? = null
+    private var simulationRunnable: Runnable? = null
+    private var isFragmentActive = false
 
     // Mock data - Replace with actual data from your backend
     private val driver = Driver(
@@ -119,6 +124,8 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        isFragmentActive = true
+        
         setupLocationTrackingManager()
         setupMap()
         setupDriverInfo()
@@ -150,42 +157,61 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
     }
     
     private fun updateRealTimeInfo() {
+        // Check if fragment is still active before updating
+        if (!isFragmentActive || !isAdded || context == null) {
+            return
+        }
+        
         updateEstimatedArrivalTime()
         updateDriverStatus()
         updateConnectionLine()
     }
     
     private fun updateConnectionLine() {
+        // Check if fragment is still active before updating
+        if (!isFragmentActive || !isAdded || context == null) {
+            return
+        }
+        
         userLocation?.let { user ->
             driverLocation?.let { driver ->
-                // Remove previous connection line
-                connectionPolyline?.remove()
-                
-                // Draw new connection line with dotted pattern
-                connectionPolyline = map.addPolyline(
-                    PolylineOptions()
-                        .add(user, driver)
-                        .color(resources.getColor(R.color.purple_700, null))
-                        .width(8f)
-                        .pattern(listOf(Dot(), Gap(15f)))
-                )
-                
-                // Update camera to show both markers with some padding
-                val bounds = com.google.android.gms.maps.model.LatLngBounds.Builder()
-                    .include(user)
-                    .include(driver)
-                    .build()
-                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150))
+                try {
+                    // Remove previous connection line
+                    connectionPolyline?.remove()
+                    
+                    // Draw new connection line with dotted pattern
+                    connectionPolyline = map.addPolyline(
+                        PolylineOptions()
+                            .add(user, driver)
+                            .color(resources.getColor(R.color.purple_700, null))
+                            .width(8f)
+                            .pattern(listOf(Dot(), Gap(15f)))
+                    )
+                    
+                    // Update camera to show both markers with some padding
+                    val bounds = com.google.android.gms.maps.model.LatLngBounds.Builder()
+                        .include(user)
+                        .include(driver)
+                        .build()
+                    map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150))
+                } catch (e: Exception) {
+                    android.util.Log.e("OngoingRideFragment", "Error updating connection line: ${e.message}")
+                }
             }
         }
     }
     
     private fun simulateDriverMovement() {
         // For demo purposes, simulate driver moving towards user
-        val simulationHandler = Handler(Looper.getMainLooper())
-        val simulationRunnable = object : Runnable {
+        simulationHandler = Handler(Looper.getMainLooper())
+        simulationRunnable = object : Runnable {
             private var step = 0
             override fun run() {
+                // Check if fragment is still active before proceeding
+                if (!isFragmentActive || !isAdded || context == null) {
+                    return
+                }
+                
                 userLocation?.let { user ->
                     // Create a simulated driver location that moves towards the user
                     val initialDriverLat = user.latitude + 0.01 // Start 1km away
@@ -202,13 +228,13 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
                     updateDriverLocation(simulatedDriverLocation, simulatedSpeed, simulatedHeading)
                     
                     step++
-                    if (step < 40) { // Continue for 40 steps (2 minutes)
-                        simulationHandler.postDelayed(this, 3000) // Update every 3 seconds
+                    if (step < 40 && isFragmentActive && isAdded) { // Continue for 40 steps (2 minutes)
+                        simulationHandler?.postDelayed(this, 3000) // Update every 3 seconds
                     }
                 }
             }
         }
-        simulationHandler.postDelayed(simulationRunnable, 2000) // Start after 2 seconds
+        simulationHandler?.postDelayed(simulationRunnable!!, 2000) // Start after 2 seconds
     }
     
     private fun setupLocationTrackingManager() {
@@ -415,6 +441,11 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
     }
     
     private fun updateDriverLocation(location: LatLng, speed: Float, heading: Float) {
+        // Check if fragment is still active before updating
+        if (!isFragmentActive || !isAdded || context == null) {
+            return
+        }
+        
         driverLocation = location
         currentDriverSpeed = speed
         currentDriverHeading = heading
@@ -426,6 +457,11 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
     }
     
     private fun updateTruckLocation(location: LatLng, speed: Float, heading: Float) {
+        // Check if fragment is still active before updating
+        if (!isFragmentActive || !isAdded || context == null) {
+            return
+        }
+        
         // Update truck location if needed
         updateMapMarkers()
         updateEstimatedArrivalTime()
@@ -433,10 +469,19 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
     }
     
     private fun updateDriverStatus() {
-        val speedKmh = (currentDriverSpeed * 3.6).toInt() // Convert m/s to km/h
-        val timeAgo = getTimeAgo(lastUpdateTime)
+        // Check if fragment is still active before updating
+        if (!isFragmentActive || !isAdded || context == null || _binding == null) {
+            return
+        }
         
-        binding.driverStatus.text = "Speed: ${speedKmh} km/h • Updated: $timeAgo"
+        try {
+            val speedKmh = (currentDriverSpeed * 3.6).toInt() // Convert m/s to km/h
+            val timeAgo = getTimeAgo(lastUpdateTime)
+            
+            binding.driverStatus.text = "Speed: ${speedKmh} km/h • Updated: $timeAgo"
+        } catch (e: Exception) {
+            android.util.Log.e("OngoingRideFragment", "Error updating driver status: ${e.message}")
+        }
     }
     
     private fun getTimeAgo(timestamp: Long): String {
@@ -453,33 +498,43 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
 
 
     private fun updateMapMarkers() {
-        // Clear existing driver marker
-        driverMarker?.remove()
-        // Remove previous polyline
-        routePolyline?.remove()
-        // Add driver marker with custom icon
-        driverLocation?.let { location ->
-            val truckBitmap = BitmapFactory.decodeResource(resources, R.drawable.tow_truck_icon)
-            val largeTruckIcon = Bitmap.createScaledBitmap(truckBitmap, 120, 120, false)
-            driverMarker = map.addMarker(
-                MarkerOptions()
-                    .position(location)
-                    .title("Driver Location")
-                    .snippet("Speed: ${(currentDriverSpeed * 3.6).toInt()} km/h")
-                    .icon(BitmapDescriptorFactory.fromBitmap(largeTruckIcon))
-                    .rotation(currentDriverHeading)
-                    .anchor(0.5f, 0.5f)
-            )
+        // Check if fragment is still active and attached
+        if (!isFragmentActive || !isAdded || context == null) {
+            return
         }
-        // Update camera to show both markers
-        if (userLocation != null && driverLocation != null) {
-            val bounds = com.google.android.gms.maps.model.LatLngBounds.Builder()
-                .include(userLocation!!)
-                .include(driverLocation!!)
-                .build()
-            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150))
-            // Fetch and draw route
-            fetchAndDrawRoute(userLocation!!, driverLocation!!)
+        
+        try {
+            // Clear existing driver marker
+            driverMarker?.remove()
+            // Remove previous polyline
+            routePolyline?.remove()
+            // Add driver marker with custom icon
+            driverLocation?.let { location ->
+                val truckBitmap = BitmapFactory.decodeResource(resources, R.drawable.tow_truck_icon)
+                val largeTruckIcon = Bitmap.createScaledBitmap(truckBitmap, 120, 120, false)
+                driverMarker = map.addMarker(
+                    MarkerOptions()
+                        .position(location)
+                        .title("Driver Location")
+                        .snippet("Speed: ${(currentDriverSpeed * 3.6).toInt()} km/h")
+                        .icon(BitmapDescriptorFactory.fromBitmap(largeTruckIcon))
+                        .rotation(currentDriverHeading)
+                        .anchor(0.5f, 0.5f)
+                )
+            }
+            // Update camera to show both markers
+            if (userLocation != null && driverLocation != null) {
+                val bounds = com.google.android.gms.maps.model.LatLngBounds.Builder()
+                    .include(userLocation!!)
+                    .include(driverLocation!!)
+                    .build()
+                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150))
+                // Fetch and draw route
+                fetchAndDrawRoute(userLocation!!, driverLocation!!)
+            }
+        } catch (e: Exception) {
+            // Log the error but don't crash
+            android.util.Log.e("OngoingRideFragment", "Error updating map markers: ${e.message}")
         }
     }
 
@@ -500,19 +555,28 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun updateEstimatedArrivalTime() {
+        // Check if fragment is still active before updating
+        if (!isFragmentActive || !isAdded || context == null || _binding == null) {
+            return
+        }
+        
         userLocation?.let { user ->
             driverLocation?.let { driver ->
-                val distance = calculateDistance(user, driver)
-                val estimatedTimeMinutes = calculateEstimatedTime(distance, currentDriverSpeed)
-                
-                // Format time display
-                val timeDisplay = when {
-                    estimatedTimeMinutes < 1 -> "Less than 1 min"
-                    estimatedTimeMinutes < 60 -> "$estimatedTimeMinutes mins"
-                    else -> "${estimatedTimeMinutes / 60}h ${estimatedTimeMinutes % 60}m"
+                try {
+                    val distance = calculateDistance(user, driver)
+                    val estimatedTimeMinutes = calculateEstimatedTime(distance, currentDriverSpeed)
+                    
+                    // Format time display
+                    val timeDisplay = when {
+                        estimatedTimeMinutes < 1 -> "Less than 1 min"
+                        estimatedTimeMinutes < 60 -> "$estimatedTimeMinutes mins"
+                        else -> "${estimatedTimeMinutes / 60}h ${estimatedTimeMinutes % 60}m"
+                    }
+                    
+                    binding.estimatedArrivalTime.text = "Arriving in $timeDisplay"
+                } catch (e: Exception) {
+                    android.util.Log.e("OngoingRideFragment", "Error updating ETA: ${e.message}")
                 }
-                
-                binding.estimatedArrivalTime.text = "Arriving in $timeDisplay"
             }
         }
     }
@@ -553,7 +617,17 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        fusedLocationClient.removeLocationUpdates { } // Stop location updates
+        
+        // Mark fragment as inactive
+        isFragmentActive = false
+        
+        // Stop simulation
+        simulationHandler?.removeCallbacksAndMessages(null)
+        simulationRunnable = null
+        simulationHandler = null
+        
+        // Stop location updates
+        fusedLocationClient.removeLocationUpdates { }
         locationUpdateJob?.cancel()
         
         // Stop real-time updates
