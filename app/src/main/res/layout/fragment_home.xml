@@ -32,19 +32,7 @@
         app:backgroundTint="@color/design_default_color_primary"
         app:tint="@android:color/white" />
 
-    <!-- Request Tow Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/requestTowButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_margin="16dp"
-        android:padding="16dp"
-        android:text="Request Tow Truck"
-        android:textSize="16sp"
-        app:cornerRadius="8dp"
-        app:icon="@drawable/ic_tow_truck"
-        app:iconGravity="textStart" />
+
 
     <!-- Loading Progress -->
     <ProgressBar

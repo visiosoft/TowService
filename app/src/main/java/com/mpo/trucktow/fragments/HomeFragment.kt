@@ -86,9 +86,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 findNavController().navigate(R.id.action_home_to_profile)
             }
 
-            view.findViewById<MaterialButton>(R.id.requestTowButton)?.setOnClickListener {
-                findNavController().navigate(R.id.action_home_to_request_tow)
-            }
+
 
             view.findViewById<FloatingActionButton>(R.id.updateLocationButton)?.setOnClickListener {
                 updateCurrentLocation()

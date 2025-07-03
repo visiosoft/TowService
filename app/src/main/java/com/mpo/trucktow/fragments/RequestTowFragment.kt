@@ -50,11 +50,9 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     private var _binding: FragmentRequestTowBinding? = null
     private val binding get() = _binding!!
     
-    private var pickupMap: GoogleMap? = null
     private var dropMap: GoogleMap? = null
     private var pickupLocation: LatLng? = null
     private var dropLocation: LatLng? = null
-    private var pickupMarker: com.google.android.gms.maps.model.Marker? = null
     private var dropMarker: com.google.android.gms.maps.model.Marker? = null
     private var routePolyline: Polyline? = null
     
@@ -113,12 +111,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupMaps() {
-        val pickupMapFragment = childFragmentManager.findFragmentById(R.id.pickupMap) as SupportMapFragment
-        pickupMapFragment.getMapAsync { map ->
-            pickupMap = map
-            setupMap(map, true)
-        }
-        
         val dropMapFragment = childFragmentManager.findFragmentById(R.id.dropMap) as SupportMapFragment
         dropMapFragment.getMapAsync { map ->
             dropMap = map
@@ -131,20 +123,14 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         map.uiSettings.isMyLocationButtonEnabled = false
         
         if (checkLocationPermission()) {
-            if (isPickupMap) {
-                enableMyLocation()
-            }
+            enableMyLocation()
         } else {
             requestLocationPermission()
         }
         
         // Add map click listener for manual location selection
         map.setOnMapClickListener { latLng ->
-            if (isPickupMap) {
-                setPickupLocation(latLng)
-            } else {
-                setDropLocation(latLng)
-            }
+            setDropLocation(latLng)
         }
     }
 
@@ -218,14 +204,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     
     private fun setPickupLocation(location: LatLng) {
         pickupLocation = location
-        pickupMarker?.remove()
-        pickupMarker = pickupMap?.addMarker(
-            MarkerOptions()
-                .position(location)
-                .title("Pickup Location")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-        )
-        pickupMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15f))
         calculateRoute()
     }
     
@@ -359,15 +337,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     
     private fun displayRoute(polylinePoints: List<LatLng>, distanceText: String, durationText: String, routeType: String) {
         try {
-            // Draw polyline on pickup map
-            routePolyline?.remove()
-            routePolyline = pickupMap?.addPolyline(
-                PolylineOptions()
-                    .addAll(polylinePoints)
-                    .color(resources.getColor(R.color.purple_700, null))
-                    .width(8f)
-            )
-            
             // Calculate estimated cost
             val estimatedCost = calculateEstimatedCost(distanceText)
             
@@ -376,13 +345,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             binding.estimatedTimeText.text = durationText
             binding.estimatedCostText.text = estimatedCost
             binding.routeStatusText.text = "✅ Route calculated ($routeType)"
-            
-            // Fit camera to show entire route
-            val bounds = com.google.android.gms.maps.model.LatLngBounds.Builder()
-                .include(pickupLocation!!)
-                .include(dropLocation!!)
-                .build()
-            pickupMap?.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
             
             // Show success message
             Toast.makeText(requireContext(), "Route: $distanceText, $durationText, Cost: $estimatedCost", Toast.LENGTH_SHORT).show()
@@ -427,15 +389,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     
     private fun displayRouteWithCost(polylinePoints: List<LatLng>, distanceInKm: Double, distanceText: String, durationText: String, routeType: String) {
         try {
-            // Draw polyline on pickup map
-            routePolyline?.remove()
-            routePolyline = pickupMap?.addPolyline(
-                PolylineOptions()
-                    .addAll(polylinePoints)
-                    .color(resources.getColor(R.color.purple_700, null))
-                    .width(8f)
-            )
-            
             // Calculate estimated cost using actual distance value
             val ratePerKm = 3.0 // 3 AED per km
             val estimatedCost = "%.2f AED".format(distanceInKm * ratePerKm)
@@ -445,13 +398,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             binding.estimatedTimeText.text = durationText
             binding.estimatedCostText.text = estimatedCost
             binding.routeStatusText.text = "✅ Route calculated ($routeType)"
-            
-            // Fit camera to show entire route
-            val bounds = com.google.android.gms.maps.model.LatLngBounds.Builder()
-                .include(pickupLocation!!)
-                .include(dropLocation!!)
-                .build()
-            pickupMap?.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
             
             // Show success message
             Toast.makeText(requireContext(), "Route: $distanceText, $durationText, Cost: $estimatedCost", Toast.LENGTH_SHORT).show()
@@ -542,50 +488,11 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             // Calculate time for tow truck to reach car
             val timeToReach = calculateTimeToReach(carLocation, towTruckLocation)
             
-            // Add car marker
-            val carMarker = pickupMap?.addMarker(
-                MarkerOptions()
-                    .position(carLocation)
-                    .title("Your Car")
-                    .snippet("Waiting for tow truck")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-            )
-            
-            // Add tow truck marker
-            val towTruckMarker = pickupMap?.addMarker(
-                MarkerOptions()
-                    .position(towTruckLocation)
-                    .title("Tow Truck")
-                    .snippet("Coming to you in $timeToReach")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-            )
-            
-            // Draw connection line between car and tow truck
-            val connectionPolyline = pickupMap?.addPolyline(
-                PolylineOptions()
-                    .add(carLocation, towTruckLocation)
-                    .color(resources.getColor(R.color.purple_700, null))
-                    .width(6f)
-                    .pattern(listOf(Dot(), Gap(20f)))
-            )
-            
-            // Fit camera to show both car and tow truck
-            val bounds = com.google.android.gms.maps.model.LatLngBounds.Builder()
-                .include(carLocation)
-                .include(towTruckLocation)
-                .build()
-            pickupMap?.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
-            
             // Show connection info
             binding.routeStatusText.text = "🚗 Tow truck coming in $timeToReach"
             
             // Show success message
             Toast.makeText(requireContext(), "Tow truck dispatched! ETA: $timeToReach", Toast.LENGTH_LONG).show()
-            
-            // Store markers for later removal
-            carMarker?.let { markers.add(it) }
-            towTruckMarker?.let { markers.add(it) }
-            connectionPolyline?.let { polylines.add(it) }
             
         } catch (e: Exception) {
             Log.e("RequestTowFragment", "Error showing car-tow truck connection", e)
@@ -649,10 +556,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupUpdateLocationButtons() {
-        binding.updateLocationButton.setOnClickListener {
-            updateCurrentLocation()
-        }
-        
         binding.updateDropLocationButton.setOnClickListener {
             // For demo purposes, set a random drop location near the pickup
             pickupLocation?.let { pickup ->
@@ -673,8 +576,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
                 }
             }
         }
-        
-
     }
 
     private fun validateInputs(): Boolean {
@@ -707,7 +608,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
 
     private fun enableMyLocation() {
         if (checkLocationPermission()) {
-            pickupMap?.isMyLocationEnabled = false // Disable default blue dot
             getCurrentLocation()
             startLocationUpdates()
         }
@@ -767,8 +667,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
 
     private fun updateCurrentLocation() {
         if (checkLocationPermission()) {
-            // Show loading indicator
-            binding.updateLocationButton.isEnabled = false
             Toast.makeText(context, "Updating location...", Toast.LENGTH_SHORT).show()
             
             // Get fresh location
@@ -776,9 +674,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
                 location?.let {
                     val currentLatLng = LatLng(location.latitude, location.longitude)
                     setPickupLocation(currentLatLng)
-                    
-                    // Move camera to new location
-                    pickupMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 17f))
                     
                     // Update address
                     val geocoder = android.location.Geocoder(requireContext(), java.util.Locale.getDefault())
@@ -796,12 +691,8 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
                 } ?: run {
                     Toast.makeText(context, "Unable to get current location", Toast.LENGTH_SHORT).show()
                 }
-                
-                // Re-enable button
-                binding.updateLocationButton.isEnabled = true
             }.addOnFailureListener {
                 Toast.makeText(context, "Failed to update location", Toast.LENGTH_SHORT).show()
-                binding.updateLocationButton.isEnabled = true
             }
         } else {
             Toast.makeText(context, "Location permission required", Toast.LENGTH_SHORT).show()
