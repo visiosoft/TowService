@@ -82,9 +82,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
             // Setup UI elements
-            view.findViewById<FloatingActionButton>(R.id.profileButton)?.setOnClickListener {
-                findNavController().navigate(R.id.action_home_to_profile)
-            }
 
 
 
