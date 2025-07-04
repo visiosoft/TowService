@@ -46,6 +46,109 @@
                 android:textColor="@color/white"/>
         </LinearLayout>
 
+        <!-- Progress Indicator -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="20dp">
+
+            <!-- Progress Steps -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <!-- Step 1: Location -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <View
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:background="@drawable/circle_bg"
+                        android:backgroundTint="@color/accent_blue"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Location"
+                        android:textSize="10sp"
+                        android:textColor="@color/accent_blue"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+
+                <!-- Connector Line -->
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="2dp"
+                    android:layout_weight="1"
+                    android:background="@color/divider"
+                    android:layout_marginHorizontal="8dp"/>
+
+                <!-- Step 2: Vehicle -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <View
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:background="@drawable/circle_bg"
+                        android:backgroundTint="@color/divider"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Vehicle"
+                        android:textSize="10sp"
+                        android:textColor="@color/text_secondary"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+
+                <!-- Connector Line -->
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="2dp"
+                    android:layout_weight="1"
+                    android:background="@color/divider"
+                    android:layout_marginHorizontal="8dp"/>
+
+                <!-- Step 3: Confirm -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <View
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:background="@drawable/circle_bg"
+                        android:backgroundTint="@color/divider"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Confirm"
+                        android:textSize="10sp"
+                        android:textColor="@color/text_secondary"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
         <!-- Location Selection Section -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
@@ -204,7 +307,7 @@
                             android:textColor="@color/text_primary"/>
 
                         <com.google.android.material.button.MaterialButton
-                            android:id="@+id/updateDropLocationButton"
+                            android:id="@+id/updateLocationButton"
                             android:layout_width="wrap_content"
                             android:layout_height="32dp"
                             android:text="Update"
@@ -241,12 +344,12 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Route Information Section -->
+        <!-- Trip Details Section -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            app:cardCornerRadius="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
             app:cardElevation="4dp"
             app:cardBackgroundColor="@color/card_background"
             app:strokeColor="@color/divider"
@@ -256,7 +359,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="16dp">
 
                 <!-- Section Header -->
                 <LinearLayout
@@ -264,14 +367,14 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginBottom="12dp">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
                         android:src="@drawable/ic_tow"
                         app:tint="@color/accent_blue"
-                        android:layout_marginEnd="12dp"/>
+                        android:layout_marginEnd="8dp"/>
 
                     <TextView
                         android:layout_width="0dp"
@@ -279,7 +382,7 @@
                         android:layout_weight="1"
                         android:text="Trip Details"
                         android:textStyle="bold"
-                        android:textSize="18sp"
+                        android:textSize="16sp"
                         android:textColor="@color/text_primary"
                         android:gravity="center_vertical"/>
 
@@ -288,7 +391,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="📍 Select locations"
-                        android:textSize="12sp"
+                        android:textSize="10sp"
                         android:textColor="@color/text_hint"
                         android:background="@color/chip_background"
                         android:paddingHorizontal="8dp"
@@ -307,15 +410,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="8dp">
 
                         <!-- Distance Card -->
                         <com.google.android.material.card.MaterialCardView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginEnd="6dp"
-                            app:cardCornerRadius="12dp"
+                            android:layout_marginEnd="4dp"
+                            app:cardCornerRadius="8dp"
                             app:cardElevation="2dp"
                             app:cardBackgroundColor="@color/background_secondary">
 
@@ -323,30 +426,30 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
-                                android:padding="16dp"
+                                android:padding="12dp"
                                 android:gravity="center">
 
                                 <ImageView
-                                    android:layout_width="24dp"
-                                    android:layout_height="24dp"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
                                     android:src="@drawable/ic_location"
                                     app:tint="@color/accent_blue"
-                                    android:layout_marginBottom="8dp"/>
+                                    android:layout_marginBottom="6dp"/>
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Distance"
-                                    android:textSize="12sp"
+                                    android:textSize="11sp"
                                     android:textColor="@color/text_secondary"
-                                    android:layout_marginBottom="4dp"/>
+                                    android:layout_marginBottom="2dp"/>
 
                                 <TextView
                                     android:id="@+id/distanceText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="--"
-                                    android:textSize="18sp"
+                                    android:textSize="16sp"
                                     android:textStyle="bold"
                                     android:textColor="@color/text_primary"/>
                             </LinearLayout>
@@ -357,8 +460,8 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="6dp"
-                            app:cardCornerRadius="12dp"
+                            android:layout_marginStart="4dp"
+                            app:cardCornerRadius="8dp"
                             app:cardElevation="2dp"
                             app:cardBackgroundColor="@color/background_secondary">
 
@@ -366,30 +469,30 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
-                                android:padding="16dp"
+                                android:padding="12dp"
                                 android:gravity="center">
 
                                 <ImageView
-                                    android:layout_width="24dp"
-                                    android:layout_height="24dp"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
                                     android:src="@drawable/ic_tow"
                                     app:tint="@color/accent_green"
-                                    android:layout_marginBottom="8dp"/>
+                                    android:layout_marginBottom="6dp"/>
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="ETA"
-                                    android:textSize="12sp"
+                                    android:textSize="11sp"
                                     android:textColor="@color/text_secondary"
-                                    android:layout_marginBottom="4dp"/>
+                                    android:layout_marginBottom="2dp"/>
 
                                 <TextView
                                     android:id="@+id/estimatedTimeText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="--"
-                                    android:textSize="18sp"
+                                    android:textSize="16sp"
                                     android:textStyle="bold"
                                     android:textColor="@color/text_primary"/>
                             </LinearLayout>
@@ -407,8 +510,8 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginEnd="6dp"
-                            app:cardCornerRadius="12dp"
+                            android:layout_marginEnd="4dp"
+                            app:cardCornerRadius="8dp"
                             app:cardElevation="2dp"
                             app:cardBackgroundColor="@color/background_secondary">
 
@@ -416,30 +519,30 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
-                                android:padding="16dp"
+                                android:padding="12dp"
                                 android:gravity="center">
 
                                 <ImageView
-                                    android:layout_width="24dp"
-                                    android:layout_height="24dp"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
                                     android:src="@drawable/ic_credit_card"
                                     app:tint="@color/accent_green"
-                                    android:layout_marginBottom="8dp"/>
+                                    android:layout_marginBottom="6dp"/>
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Rate"
-                                    android:textSize="12sp"
+                                    android:textSize="11sp"
                                     android:textColor="@color/text_secondary"
-                                    android:layout_marginBottom="4dp"/>
+                                    android:layout_marginBottom="2dp"/>
 
                                 <TextView
                                     android:id="@+id/rateText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="3 AED/km"
-                                    android:textSize="18sp"
+                                    android:textSize="16sp"
                                     android:textStyle="bold"
                                     android:textColor="@color/accent_green"/>
                             </LinearLayout>
@@ -450,8 +553,8 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="6dp"
-                            app:cardCornerRadius="12dp"
+                            android:layout_marginStart="4dp"
+                            app:cardCornerRadius="8dp"
                             app:cardElevation="2dp"
                             app:cardBackgroundColor="@color/chip_background">
 
@@ -459,30 +562,30 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
-                                android:padding="16dp"
+                                android:padding="12dp"
                                 android:gravity="center">
 
                                 <ImageView
-                                    android:layout_width="24dp"
-                                    android:layout_height="24dp"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
                                     android:src="@drawable/ic_credit_card"
                                     app:tint="@color/accent_orange"
-                                    android:layout_marginBottom="8dp"/>
+                                    android:layout_marginBottom="6dp"/>
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Total Cost"
-                                    android:textSize="12sp"
+                                    android:textSize="11sp"
                                     android:textColor="@color/text_secondary"
-                                    android:layout_marginBottom="4dp"/>
+                                    android:layout_marginBottom="2dp"/>
 
                                 <TextView
                                     android:id="@+id/estimatedCostText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="--"
-                                    android:textSize="18sp"
+                                    android:textSize="16sp"
                                     android:textStyle="bold"
                                     android:textColor="@color/accent_orange"/>
                             </LinearLayout>
@@ -593,18 +696,20 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/requestButton"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="Request Tow Truck"
-            android:textSize="16sp"
+            android:layout_height="64dp"
+            android:text="@string/request_tow_now_button"
+            android:textSize="18sp"
             android:textStyle="bold"
-            app:cornerRadius="28dp"
-            app:elevation="8dp"
+            app:cornerRadius="32dp"
+            app:elevation="12dp"
             app:backgroundTint="@color/accent_blue"
             android:textColor="@color/white"
             app:icon="@drawable/ic_tow"
-            app:iconSize="24dp"
+            app:iconSize="28dp"
             app:iconGravity="textStart"
-            app:iconPadding="8dp"/>
+            app:iconPadding="12dp"
+            android:alpha="0.6"
+            android:enabled="false"/>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView> 

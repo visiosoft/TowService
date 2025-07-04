@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">trucktow</string>
+    
+    <!-- Request Tow Section -->
+    <string name="request_tow_now_button">🚛 REQUEST TOW NOW</string>
+    <string name="select_locations_hint">📍 Select pickup and drop locations to see route</string>
+    <string name="ready_to_request">✅ Ready to request tow truck</string>
+    <string name="calculating_route">🔄 Calculating route...</string>
+    <string name="route_calculated">✅ Route calculated</string>
+    <string name="route_calculated_offline">✅ Route calculated (offline)</string>
+    <string name="please_complete_fields">⚠️ Please complete all required fields</string>
+    <string name="sending_request">📡 Sending request to nearby drivers...</string>
+    <string name="tow_truck_found">✅ Tow truck found! Redirecting...</string>
+    <string name="success_message">Tow truck dispatched successfully!</string>
 </resources>

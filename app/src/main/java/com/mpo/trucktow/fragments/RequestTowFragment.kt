@@ -60,6 +60,10 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     private val markers = mutableListOf<com.google.android.gms.maps.model.Marker>()
     private val polylines = mutableListOf<Polyline>()
     
+    // Countdown timer handler
+    private var countdownHandler: Handler? = null
+    private var countdownRunnable: Runnable? = null
+    
     private val AUTOCOMPLETE_REQUEST_CODE_PICKUP = 1
     private val AUTOCOMPLETE_REQUEST_CODE_DROP = 2
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -158,6 +162,59 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
                 .build(requireContext())
             startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE_DROP)
         }
+        
+        // Setup vehicle type selection listeners
+        setupVehicleTypeListeners()
+    }
+
+    private fun setupVehicleTypeListeners() {
+        binding.carChip.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                clearVehicleTypeError()
+                updateRequestButtonState()
+            }
+        }
+        
+        binding.bikeChip.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                clearVehicleTypeError()
+                updateRequestButtonState()
+            }
+        }
+        
+        binding.truckChip.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                clearVehicleTypeError()
+                updateRequestButtonState()
+            }
+        }
+    }
+    
+    private fun updateRequestButtonState() {
+        val isReady = pickupLocation != null && dropLocation != null && getSelectedVehicleType() != null
+        binding.requestButton.isEnabled = isReady
+        
+        if (isReady) {
+            binding.requestButton.alpha = 1.0f
+            binding.routeStatusText.text = getString(R.string.ready_to_request)
+            binding.routeStatusText.setTextColor(requireContext().getColor(R.color.accent_green))
+            updateProgressIndicator(3) // All steps completed
+        } else {
+            binding.requestButton.alpha = 0.6f
+            // Update progress based on what's completed
+            val progress = when {
+                pickupLocation != null && dropLocation != null -> 1
+                pickupLocation != null || dropLocation != null -> 0
+                else -> 0
+            }
+            updateProgressIndicator(progress)
+        }
+    }
+    
+    private fun updateProgressIndicator(step: Int) {
+        // This would update the progress indicator in the layout
+        // For now, we'll just log the progress
+        Log.d("RequestTowFragment", "Progress updated to step: $step")
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -205,6 +262,7 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     private fun setPickupLocation(location: LatLng) {
         pickupLocation = location
         calculateRoute()
+        updateRequestButtonState()
     }
     
     private fun setDropLocation(location: LatLng) {
@@ -218,11 +276,19 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         )
         dropMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15f))
         calculateRoute()
+        updateRequestButtonState()
     }
     
     private fun calculateRoute() {
         if (pickupLocation != null && dropLocation != null) {
-            binding.routeStatusText.text = "Calculating route..."
+            // Show calculating status
+            binding.routeStatusText.text = getString(R.string.calculating_route)
+            binding.routeStatusText.setTextColor(requireContext().getColor(R.color.accent_blue))
+            
+            // Clear previous route data
+            binding.distanceText.text = "--"
+            binding.estimatedTimeText.text = "--"
+            binding.estimatedCostText.text = "--"
             
             // Always create a route - either from API or fallback
             CoroutineScope(Dispatchers.Main).launch {
@@ -233,21 +299,33 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
                     if (apiResult != null) {
                         // Use API result
                         displayRoute(apiResult.polylinePoints, apiResult.distanceText, apiResult.durationText, "API Route")
+                        binding.routeStatusText.text = getString(R.string.route_calculated)
+                        binding.routeStatusText.setTextColor(requireContext().getColor(R.color.accent_green))
                     } else {
                         // Use fallback route
                         Log.d("RequestTowFragment", "API route failed, using fallback")
                         createAndDisplayFallbackRoute()
+                        binding.routeStatusText.text = getString(R.string.route_calculated_offline)
+                        binding.routeStatusText.setTextColor(requireContext().getColor(R.color.accent_orange))
                     }
                     
                 } catch (e: Exception) {
                     Log.e("RequestTowFragment", "Error in route calculation", e)
                     // Always provide a fallback route
                     createAndDisplayFallbackRoute()
+                    binding.routeStatusText.text = "✅ Route calculated (offline)"
+                    binding.routeStatusText.setTextColor(requireContext().getColor(R.color.accent_orange))
                 }
             }
         } else {
             Log.d("RequestTowFragment", "Cannot calculate route: pickup=${pickupLocation}, drop=${dropLocation}")
-            binding.routeStatusText.text = "Select both locations to see route"
+            binding.routeStatusText.text = getString(R.string.select_locations_hint)
+            binding.routeStatusText.setTextColor(requireContext().getColor(R.color.text_hint))
+            
+            // Clear route data
+            binding.distanceText.text = "--"
+            binding.estimatedTimeText.text = "--"
+            binding.estimatedCostText.text = "--"
         }
     }
     
@@ -408,65 +486,118 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     private fun setupRequestButton() {
         binding.requestButton.setOnClickListener {
             if (validateInputs()) {
-                // Start countdown timer
-                startCountdownTimer()
+                // Show loading state
+                showRequestLoadingState()
+                
+                // Simulate sending request to drivers (2 seconds)
+                Handler(Looper.getMainLooper()).postDelayed({
+                    // Show countdown after request is sent
+                    startCountdownTimer()
+                }, 2000)
             }
         }
+    }
+    
+
+    
+    private fun showRequestLoadingState() {
+        // Disable the request button and show loading
+        binding.requestButton.isEnabled = false
+        binding.requestButton.text = "Sending Request..."
+        binding.requestButton.setIconResource(android.R.drawable.ic_popup_sync)
+        
+        // Show progress indicator
+        binding.routeStatusText.text = getString(R.string.sending_request)
+        binding.routeStatusText.setTextColor(requireContext().getColor(R.color.accent_blue))
     }
     
     private fun startCountdownTimer() {
-        // Disable the request button
-        binding.requestButton.isEnabled = false
-        binding.requestButton.text = "Processing..."
-        
         // Show countdown overlay
         showCountdownOverlay()
         
-        // Start 2.5 minute countdown (150 seconds)
-        var timeLeft = 150
-        val countdownHandler = Handler(Looper.getMainLooper())
-        val countdownRunnable = object : Runnable {
+        // Start 2 minute countdown (120 seconds)
+        var timeLeft = 120
+        countdownHandler = Handler(Looper.getMainLooper())
+        countdownRunnable = object : Runnable {
             override fun run() {
-                if (timeLeft > 0) {
+                if (timeLeft > 0 && isAdded && !isDetached) {
                     updateCountdownText(timeLeft)
                     timeLeft--
-                    countdownHandler.postDelayed(this, 1000) // Update every second
+                    countdownHandler?.postDelayed(this, 1000) // Update every second
                 } else {
-                    // Countdown finished, navigate to tow truck selection
+                    // Countdown finished or fragment detached, clean up
                     hideCountdownOverlay()
-                    navigateToTowTruckSelection()
+                    if (isAdded && !isDetached) {
+                        showRequestSuccess()
+                    }
                 }
             }
         }
-        countdownHandler.post(countdownRunnable)
+        countdownHandler?.post(countdownRunnable!!)
     }
     
     private fun showCountdownOverlay() {
-        // Create and show a countdown dialog
-        val countdownDialog = CountdownDialogFragment()
-        countdownDialog.show(childFragmentManager, "CountdownDialog")
+        if (isAdded && !isDetached) {
+            try {
+                // Create and show a countdown dialog
+                val countdownDialog = CountdownDialogFragment()
+                countdownDialog.show(childFragmentManager, "CountdownDialog")
+            } catch (e: Exception) {
+                Log.e("RequestTowFragment", "Error showing countdown dialog", e)
+            }
+        }
     }
     
     private fun hideCountdownOverlay() {
-        // Hide the countdown dialog
-        val countdownDialog = childFragmentManager.findFragmentByTag("CountdownDialog") as? CountdownDialogFragment
-        countdownDialog?.dismiss()
+        if (isAdded && !isDetached) {
+            try {
+                // Hide the countdown dialog
+                val countdownDialog = childFragmentManager.findFragmentByTag("CountdownDialog") as? CountdownDialogFragment
+                countdownDialog?.dismiss()
+            } catch (e: Exception) {
+                Log.e("RequestTowFragment", "Error hiding countdown dialog", e)
+            }
+        }
     }
     
     private fun updateCountdownText(secondsLeft: Int) {
+        if (!isAdded || isDetached) return
+        
         val minutes = secondsLeft / 60
         val seconds = secondsLeft % 60
         val timeText = String.format("%02d:%02d", minutes, seconds)
         
-        // Update the countdown dialog text and progress
-        val countdownDialog = childFragmentManager.findFragmentByTag("CountdownDialog") as? CountdownDialogFragment
-        countdownDialog?.updateTime(timeText)
-        countdownDialog?.updateProgress(secondsLeft, 150) // 150 is total seconds
+        try {
+            // Update the countdown dialog text and progress
+            val countdownDialog = childFragmentManager.findFragmentByTag("CountdownDialog") as? CountdownDialogFragment
+            countdownDialog?.updateTime(timeText)
+            countdownDialog?.updateProgress(secondsLeft, 120) // 120 is total seconds
+        } catch (e: Exception) {
+            Log.e("RequestTowFragment", "Error updating countdown text", e)
+        }
+    }
+    
+    private fun showRequestSuccess() {
+        // Show success message
+        binding.routeStatusText.text = getString(R.string.tow_truck_found)
+        binding.routeStatusText.setTextColor(requireContext().getColor(R.color.accent_green))
+        
+        // Update button to show success
+        binding.requestButton.text = "Success!"
+        binding.requestButton.setIconResource(android.R.drawable.ic_dialog_info)
+        binding.requestButton.backgroundTintList = android.content.res.ColorStateList.valueOf(requireContext().getColor(R.color.accent_green))
+        
+        // Show brief success toast
+        Toast.makeText(requireContext(), getString(R.string.success_message), Toast.LENGTH_SHORT).show()
+        
+        // Navigate to ongoing ride after brief delay
+        Handler(Looper.getMainLooper()).postDelayed({
+            navigateToOngoingRide()
+        }, 1500)
     }
     
     private fun navigateToTowTruckSelection() {
-        // Navigate to dashboard fragment (which shows nearby tow trucks)
-        findNavController().navigate(R.id.action_request_tow_to_home)
+        // This method is no longer used - replaced with better flow
     }
     
     private fun showCarTowTruckConnection() {
@@ -548,7 +679,7 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupUpdateLocationButtons() {
-        binding.updateDropLocationButton.setOnClickListener {
+        binding.updateLocationButton.setOnClickListener {
             // For demo purposes, set a random drop location near the pickup
             pickupLocation?.let { pickup ->
                 val randomLat = pickup.latitude + (Math.random() - 0.5) * 0.01
@@ -571,15 +702,73 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun validateInputs(): Boolean {
+        var isValid = true
+        
+        // Validate pickup location
         if (pickupLocation == null) {
-            Toast.makeText(context, "Please select a pickup location", Toast.LENGTH_SHORT).show()
-            return false
+            showValidationError(binding.pickupLocationEditText, "Please select a pickup location")
+            isValid = false
+        } else {
+            clearValidationError(binding.pickupLocationEditText)
         }
+        
+        // Validate drop location
         if (dropLocation == null) {
-            Toast.makeText(context, "Please select a drop location", Toast.LENGTH_SHORT).show()
-            return false
+            showValidationError(binding.dropLocationEditText, "Please select a drop location")
+            isValid = false
+        } else {
+            clearValidationError(binding.dropLocationEditText)
         }
-        return true
+        
+        // Validate vehicle type selection
+        val selectedVehicleType = getSelectedVehicleType()
+        if (selectedVehicleType == null) {
+            showVehicleTypeError()
+            isValid = false
+        } else {
+            clearVehicleTypeError()
+        }
+        
+        // Show overall error message if validation fails
+        if (!isValid) {
+            binding.routeStatusText.text = getString(R.string.please_complete_fields)
+            binding.routeStatusText.setTextColor(requireContext().getColor(R.color.red_500))
+            Toast.makeText(context, getString(R.string.please_complete_fields), Toast.LENGTH_LONG).show()
+        }
+        
+        return isValid
+    }
+    
+    private fun showValidationError(editText: com.google.android.material.textfield.TextInputEditText, message: String) {
+        val parent = editText.parent.parent as? com.google.android.material.textfield.TextInputLayout
+        parent?.error = message
+        parent?.boxStrokeColor = requireContext().getColor(R.color.red_500)
+    }
+    
+    private fun clearValidationError(editText: com.google.android.material.textfield.TextInputEditText) {
+        val parent = editText.parent.parent as? com.google.android.material.textfield.TextInputLayout
+        parent?.error = null
+        parent?.boxStrokeColor = requireContext().getColor(R.color.accent_blue)
+    }
+    
+    private fun showVehicleTypeError() {
+        // binding.vehicleTypeChipGroup.setChipBackgroundColorResource(R.color.red_500) // Not valid
+        // Add a temporary error indicator
+        binding.vehicleTypeChipGroup.alpha = 0.7f
+    }
+    
+    private fun clearVehicleTypeError() {
+        // binding.vehicleTypeChipGroup.setChipBackgroundColorResource(R.color.chip_background) // Not valid
+        binding.vehicleTypeChipGroup.alpha = 1.0f
+    }
+    
+    private fun getSelectedVehicleType(): String? {
+        return when {
+            binding.carChip.isChecked -> "Car"
+            binding.bikeChip.isChecked -> "Bike"
+            binding.truckChip.isChecked -> "Truck"
+            else -> null
+        }
     }
 
     private fun checkLocationPermission(): Boolean {
@@ -727,9 +916,22 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         return points
     }
 
+
+
     override fun onDestroyView() {
         super.onDestroyView()
-        fusedLocationClient.removeLocationUpdates(object : LocationCallback() {}) // Stop location updates
+        
+        // Cancel countdown timer
+        countdownRunnable?.let { runnable ->
+            countdownHandler?.removeCallbacks(runnable)
+        }
+        countdownHandler = null
+        countdownRunnable = null
+        
+        // Stop location updates
+        fusedLocationClient.removeLocationUpdates(object : LocationCallback() {})
+        
+        // Clear binding
         _binding = null
     }
 } 

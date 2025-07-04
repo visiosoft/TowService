@@ -40,7 +40,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Processing Your Request"
+                android:text="Request Sent to Drivers"
                 android:textSize="24sp"
                 android:textStyle="bold"
                 android:textColor="#333333"
@@ -51,7 +51,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Finding the best tow truck for you..."
+                android:text="Your request has been sent to selected tow truck drivers. Waiting for responses..."
                 android:textSize="16sp"
                 android:textColor="#666666"
                 android:gravity="center"
@@ -100,7 +100,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Please wait while we connect you with nearby tow trucks"
+                android:text="Drivers have 2 minutes to accept or reject your request"
                 android:textSize="14sp"
                 android:textColor="#666666"
                 android:gravity="center"
