@@ -198,24 +198,12 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             binding.requestButton.alpha = 1.0f
             binding.routeStatusText.text = getString(R.string.ready_to_request)
             binding.routeStatusText.setTextColor(requireContext().getColor(R.color.accent_green))
-            updateProgressIndicator(3) // All steps completed
         } else {
             binding.requestButton.alpha = 0.6f
-            // Update progress based on what's completed
-            val progress = when {
-                pickupLocation != null && dropLocation != null -> 1
-                pickupLocation != null || dropLocation != null -> 0
-                else -> 0
-            }
-            updateProgressIndicator(progress)
         }
     }
     
-    private fun updateProgressIndicator(step: Int) {
-        // This would update the progress indicator in the layout
-        // For now, we'll just log the progress
-        Log.d("RequestTowFragment", "Progress updated to step: $step")
-    }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
