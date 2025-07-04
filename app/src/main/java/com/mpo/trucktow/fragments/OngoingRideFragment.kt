@@ -162,7 +162,6 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
             return
         }
         
-        updateEstimatedArrivalTime()
         updateDriverStatus()
         updateConnectionLine()
     }
@@ -426,9 +425,8 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
                                 // Update existing marker position
                                 userMarker?.position = userLocation!!
                                 
-                                // Update connection line and ETA
+                                // Update connection line
                                 updateConnectionLine()
-                                updateEstimatedArrivalTime()
                             }
                         }
                     },
@@ -452,7 +450,6 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
         lastUpdateTime = System.currentTimeMillis()
         
         updateMapMarkers()
-        updateEstimatedArrivalTime()
         updateConnectionLine()
     }
     
@@ -464,7 +461,6 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
         
         // Update truck location if needed
         updateMapMarkers()
-        updateEstimatedArrivalTime()
         updateConnectionLine()
     }
     
@@ -554,41 +550,9 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun updateEstimatedArrivalTime() {
-        // Check if fragment is still active before updating
-        if (!isFragmentActive || !isAdded || context == null || _binding == null) {
-            return
-        }
-        
-        userLocation?.let { user ->
-            driverLocation?.let { driver ->
-                try {
-                    val distance = calculateDistance(user, driver)
-                    val estimatedTimeMinutes = calculateEstimatedTime(distance, currentDriverSpeed)
-                    
-                    // Format time display
-                    val timeDisplay = when {
-                        estimatedTimeMinutes < 1 -> "Less than 1 min"
-                        estimatedTimeMinutes < 60 -> "$estimatedTimeMinutes mins"
-                        else -> "${estimatedTimeMinutes / 60}h ${estimatedTimeMinutes % 60}m"
-                    }
-                    
-                    binding.estimatedArrivalTime.text = "Arriving in $timeDisplay"
-                } catch (e: Exception) {
-                    android.util.Log.e("OngoingRideFragment", "Error updating ETA: ${e.message}")
-                }
-            }
-        }
-    }
+
     
-    private fun calculateEstimatedTime(distanceKm: Double, speedMs: Float): Int {
-        val speedKmh = speedMs * 3.6 // Convert m/s to km/h
-        return if (speedKmh > 0) {
-            ((distanceKm / speedKmh) * 60).toInt() // Convert to minutes
-        } else {
-            (distanceKm * 2).toInt() // Fallback: assume 30 km/h average
-        }.coerceAtLeast(1) // Minimum 1 minute
-    }
+
 
     private fun calculateDistance(point1: LatLng, point2: LatLng): Double {
         val results = FloatArray(1)

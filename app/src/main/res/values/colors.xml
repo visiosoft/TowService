@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Material Design Colors -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -7,7 +8,56 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    
+    <!-- App Specific Colors -->
     <color name="design_default_color_primary">#6200EE</color>
     <color name="green_500">#4CAF50</color>
     <color name="red_500">#F44336</color>
+    
+    <!-- Day Mode Colors -->
+    <color name="background_light">#FAFAFA</color>
+    <color name="surface_light">#FFFFFF</color>
+    <color name="card_background_light">#FFFFFF</color>
+    <color name="text_primary_light">#212121</color>
+    <color name="text_secondary_light">#757575</color>
+    <color name="text_hint_light">#BDBDBD</color>
+    <color name="divider_light">#E0E0E0</color>
+    <color name="overlay_light">#CC000000</color>
+    <color name="status_bar_light">#1976D2</color>
+    <color name="accent_blue_light">#2196F3</color>
+    <color name="accent_green_light">#4CAF50</color>
+    <color name="accent_orange_light">#FF9800</color>
+    <color name="background_secondary_light">#F5F5F5</color>
+    <color name="chip_background_light">#E3F2FD</color>
+    
+    <!-- Night Mode Colors -->
+    <color name="background_dark">#121212</color>
+    <color name="surface_dark">#1E1E1E</color>
+    <color name="card_background_dark">#2D2D2D</color>
+    <color name="text_primary_dark">#FFFFFF</color>
+    <color name="text_secondary_dark">#B3FFFFFF</color>
+    <color name="text_hint_dark">#80FFFFFF</color>
+    <color name="divider_dark">#424242</color>
+    <color name="overlay_dark">#CC000000</color>
+    <color name="status_bar_dark">#000000</color>
+    <color name="accent_blue_dark">#64B5F6</color>
+    <color name="accent_green_dark">#81C784</color>
+    <color name="accent_orange_dark">#FFB74D</color>
+    <color name="background_secondary_dark">#1A1A1A</color>
+    <color name="chip_background_dark">#1E3A5F</color>
+    
+    <!-- Semantic Colors (will be used in themes) -->
+    <color name="background">@color/background_light</color>
+    <color name="surface">@color/surface_light</color>
+    <color name="card_background">@color/card_background_light</color>
+    <color name="text_primary">@color/text_primary_light</color>
+    <color name="text_secondary">@color/text_secondary_light</color>
+    <color name="text_hint">@color/text_hint_light</color>
+    <color name="divider">@color/divider_light</color>
+    <color name="overlay">@color/overlay_light</color>
+    <color name="accent_blue">@color/accent_blue_light</color>
+    <color name="accent_green">@color/accent_green_light</color>
+    <color name="accent_orange">@color/accent_orange_light</color>
+    <color name="background_secondary">@color/background_secondary_light</color>
+    <color name="chip_background">@color/chip_background_light</color>
 </resources>

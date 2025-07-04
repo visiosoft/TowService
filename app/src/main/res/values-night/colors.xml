@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Night Mode Color Overrides -->
+    <color name="background">@color/background_dark</color>
+    <color name="surface">@color/surface_dark</color>
+    <color name="card_background">@color/card_background_dark</color>
+    <color name="text_primary">@color/text_primary_dark</color>
+    <color name="text_secondary">@color/text_secondary_dark</color>
+    <color name="text_hint">@color/text_hint_dark</color>
+    <color name="divider">@color/divider_dark</color>
+    <color name="overlay">@color/overlay_dark</color>
+    <color name="accent_blue">@color/accent_blue_dark</color>
+    <color name="accent_green">@color/accent_green_dark</color>
+    <color name="accent_orange">@color/accent_orange_dark</color>
+    <color name="background_secondary">@color/background_secondary_dark</color>
+    <color name="chip_background">@color/chip_background_dark</color>
+</resources> 

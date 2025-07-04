@@ -2,99 +2,60 @@
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
-
-
-        <com.google.android.material.textfield.TextInputLayout
+        <!-- Header Section -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/pickupLocationEditText"
-                android:layout_width="match_parent"
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_tow"
+                app:tint="@color/accent_blue"
+                android:layout_marginEnd="12dp"/>
+
+            <TextView
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="Pickup Location"
-                android:inputType="textPostalAddress"
-                android:focusable="false"
-                android:clickable="true"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_weight="1"
+                android:text="Request Tow Truck"
+                android:textStyle="bold"
+                android:textSize="24sp"
+                android:textColor="@color/text_primary"/>
 
-        <!-- Drop Location Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Drop Location"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <fragment
-                    android:id="@+id/dropMap"
-                    android:name="com.google.android.gms.maps.SupportMapFragment"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
-                <com.google.android.material.floatingactionbutton.FloatingActionButton
-                    android:id="@+id/updateDropLocationButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_margin="16dp"
-                    android:src="@drawable/ic_location"
-                    app:fabSize="mini"
-                    app:tint="@android:color/white"
-                    app:backgroundTint="@color/design_default_color_primary"/>
-
-            </RelativeLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/dropLocationEditText"
-                android:layout_width="match_parent"
+            <com.google.android.material.chip.Chip
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="Drop Location"
-                android:inputType="textPostalAddress"
-                android:focusable="false"
-                android:clickable="true"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:text="Step 1/3"
+                android:textSize="10sp"
+                app:chipBackgroundColor="@color/accent_blue"
+                app:chipStrokeColor="@color/accent_blue"
+                app:chipStrokeWidth="1dp"
+                android:textColor="@color/white"/>
+        </LinearLayout>
 
-        <!-- Route Information Section -->
+        <!-- Location Selection Section -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
+            android:layout_marginBottom="20dp"
+            app:cardCornerRadius="16dp"
             app:cardElevation="4dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="@color/design_default_color_primary">
+            app:cardBackgroundColor="@color/card_background"
+            app:strokeColor="@color/divider"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -102,7 +63,202 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <!-- Header -->
+                <!-- Section Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_location"
+                        app:tint="@color/accent_blue"
+                        android:layout_marginEnd="12dp"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Location Details"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:textColor="@color/text_primary"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Required"
+                        android:textSize="10sp"
+                        app:chipBackgroundColor="@color/accent_orange"
+                        app:chipStrokeColor="@color/accent_orange"
+                        app:chipStrokeWidth="1dp"
+                        android:textColor="@color/white"/>
+                </LinearLayout>
+
+                <!-- Pickup Location -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:startIconDrawable="@drawable/ic_location"
+                    app:startIconTint="@color/accent_green"
+                    app:boxStrokeColor="@color/accent_green"
+                    app:hintTextColor="@color/accent_green">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/pickupLocationEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Pickup Location"
+                        android:inputType="textPostalAddress"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:textColor="@color/text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Location Divider -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:background="@color/divider"/>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_tow"
+                        app:tint="@color/accent_blue"
+                        android:layout_marginHorizontal="12dp"/>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:background="@color/divider"/>
+                </LinearLayout>
+
+                <!-- Drop Location -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:startIconDrawable="@drawable/ic_location"
+                    app:startIconTint="@color/accent_orange"
+                    app:boxStrokeColor="@color/accent_orange"
+                    app:hintTextColor="@color/accent_orange">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/dropLocationEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Drop Location"
+                        android:inputType="textPostalAddress"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:textColor="@color/text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Map Preview Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp">
+
+                    <!-- Map Header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="12dp"
+                        android:background="@color/background_secondary"
+                        android:layout_marginBottom="8dp">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:src="@drawable/ic_tow_truck"
+                            app:tint="@color/accent_blue"
+                            android:layout_marginEnd="8dp"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Route Preview"
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_primary"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/updateDropLocationButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="Update"
+                            android:textSize="11sp"
+                            app:icon="@drawable/ic_location"
+                            app:iconSize="14dp"
+                            app:cornerRadius="16dp"
+                            app:backgroundTint="@color/accent_blue"
+                            style="@style/Widget.MaterialComponents.Button"/>
+                    </LinearLayout>
+
+                    <!-- Map Container -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:background="@color/background_secondary"
+                        android:padding="1dp">
+
+                        <fragment
+                            android:id="@+id/dropMap"
+                            android:name="com.google.android.gms.maps.SupportMapFragment"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                        <!-- Map Overlay for better UX -->
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/map_overlay_gradient"
+                            android:alpha="0.1"/>
+                    </FrameLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Route Information Section -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/card_background"
+            app:strokeColor="@color/divider"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Section Header -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -113,241 +269,342 @@
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@drawable/ic_location"
-                        app:tint="@color/design_default_color_primary"
-                        android:layout_marginEnd="8dp"/>
+                        android:src="@drawable/ic_tow"
+                        app:tint="@color/accent_blue"
+                        android:layout_marginEnd="12dp"/>
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Route Details"
+                        android:text="Trip Details"
                         android:textStyle="bold"
                         android:textSize="18sp"
-                        android:textColor="@color/design_default_color_primary"/>
+                        android:textColor="@color/text_primary"
+                        android:gravity="center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/routeStatusText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📍 Select locations"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_hint"
+                        android:background="@color/chip_background"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="4dp"
+                        android:gravity="center_vertical"/>
                 </LinearLayout>
 
-                <!-- Distance and Time Row -->
+                <!-- Info Cards Grid -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="12dp">
+                    android:orientation="vertical">
 
-                    <!-- Distance Card -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="0dp"
+                    <!-- First Row: Distance and Time -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="2dp"
-                        app:cardBackgroundColor="#F5F5F5">
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <!-- Distance Card -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="12dp"
-                            android:gravity="center">
+                            android:layout_weight="1"
+                            android:layout_marginEnd="6dp"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="2dp"
+                            app:cardBackgroundColor="@color/background_secondary">
 
-                            <TextView
-                                android:layout_width="wrap_content"
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="📏 Distance"
-                                android:textSize="12sp"
-                                android:textColor="@android:color/darker_gray"
-                                android:layout_marginBottom="4dp"/>
+                                android:orientation="vertical"
+                                android:padding="16dp"
+                                android:gravity="center">
 
-                            <TextView
-                                android:id="@+id/distanceText"
-                                android:layout_width="wrap_content"
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:src="@drawable/ic_location"
+                                    app:tint="@color/accent_blue"
+                                    android:layout_marginBottom="8dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Distance"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/text_secondary"
+                                    android:layout_marginBottom="4dp"/>
+
+                                <TextView
+                                    android:id="@+id/distanceText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="--"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/text_primary"/>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- Time Card -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="6dp"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="2dp"
+                            app:cardBackgroundColor="@color/background_secondary">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="--"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="@android:color/black"/>
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
+                                android:orientation="vertical"
+                                android:padding="16dp"
+                                android:gravity="center">
 
-                    <!-- Time Card -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="0dp"
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:src="@drawable/ic_tow"
+                                    app:tint="@color/accent_green"
+                                    android:layout_marginBottom="8dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="ETA"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/text_secondary"
+                                    android:layout_marginBottom="4dp"/>
+
+                                <TextView
+                                    android:id="@+id/estimatedTimeText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="--"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/text_primary"/>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
+
+                    <!-- Second Row: Rate and Cost -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="2dp"
-                        app:cardBackgroundColor="#F5F5F5">
+                        android:orientation="horizontal">
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <!-- Rate Card -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="12dp"
-                            android:gravity="center">
+                            android:layout_weight="1"
+                            android:layout_marginEnd="6dp"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="2dp"
+                            app:cardBackgroundColor="@color/background_secondary">
 
-                            <TextView
-                                android:layout_width="wrap_content"
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="⏱️ ETA"
-                                android:textSize="12sp"
-                                android:textColor="@android:color/darker_gray"
-                                android:layout_marginBottom="4dp"/>
+                                android:orientation="vertical"
+                                android:padding="16dp"
+                                android:gravity="center">
 
-                            <TextView
-                                android:id="@+id/estimatedTimeText"
-                                android:layout_width="wrap_content"
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:src="@drawable/ic_credit_card"
+                                    app:tint="@color/accent_green"
+                                    android:layout_marginBottom="8dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Rate"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/text_secondary"
+                                    android:layout_marginBottom="4dp"/>
+
+                                <TextView
+                                    android:id="@+id/rateText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="3 AED/km"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/accent_green"/>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- Cost Card -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="6dp"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="2dp"
+                            app:cardBackgroundColor="@color/chip_background">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="--"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="@android:color/black"/>
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
+                                android:orientation="vertical"
+                                android:padding="16dp"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:src="@drawable/ic_credit_card"
+                                    app:tint="@color/accent_orange"
+                                    android:layout_marginBottom="8dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Total Cost"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/text_secondary"
+                                    android:layout_marginBottom="4dp"/>
+
+                                <TextView
+                                    android:id="@+id/estimatedCostText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="--"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/accent_orange"/>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
                 </LinearLayout>
-
-                <!-- Rate and Cost Row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="12dp">
-
-                    <!-- Rate Card -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="2dp"
-                        app:cardBackgroundColor="#E8F5E8">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="12dp"
-                            android:gravity="center">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="💰 Rate"
-                                android:textSize="12sp"
-                                android:textColor="@android:color/darker_gray"
-                                android:layout_marginBottom="4dp"/>
-
-                            <TextView
-                                android:id="@+id/rateText"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="3 AED/km"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/design_default_color_primary"/>
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <!-- Cost Card -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="2dp"
-                        app:cardBackgroundColor="#FFF3E0">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="12dp"
-                            android:gravity="center">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="💳 Total Cost"
-                                android:textSize="12sp"
-                                android:textColor="@android:color/darker_gray"
-                                android:layout_marginBottom="4dp"/>
-
-                            <TextView
-                                android:id="@+id/estimatedCostText"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="--"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="#FF6F00"/>
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-                </LinearLayout>
-
-                <!-- Status -->
-                <TextView
-                    android:id="@+id/routeStatusText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="📍 Select both locations to see route"
-                    android:textSize="13sp"
-                    android:textColor="@android:color/darker_gray"
-                    android:gravity="center"
-                    android:layout_gravity="center"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <!-- Vehicle Type Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Vehicle Type"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/vehicleTypeChipGroup"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:singleSelection="true"
-            app:selectionRequired="true">
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/card_background"
+            app:strokeColor="@color/divider"
+            app:strokeWidth="1dp">
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/carChip"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Car"
-                android:checkable="true"/>
+                android:orientation="vertical"
+                android:padding="20dp">
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/bikeChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Bike"
-                android:checkable="true"/>
+                <!-- Section Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/truckChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Truck"
-                android:checkable="true"/>
-        </com.google.android.material.chip.ChipGroup>
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_tow_truck"
+                        app:tint="@color/accent_blue"
+                        android:layout_marginEnd="12dp"/>
 
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Vehicle Type"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:textColor="@color/text_primary"/>
 
+                    <com.google.android.material.chip.Chip
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Required"
+                        android:textSize="10sp"
+                        app:chipBackgroundColor="@color/accent_orange"
+                        app:chipStrokeColor="@color/accent_orange"
+                        app:chipStrokeWidth="1dp"
+                        android:textColor="@color/white"/>
+                </LinearLayout>
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/vehicleTypeChipGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:singleSelection="true"
+                    app:selectionRequired="true"
+                    app:chipSpacingHorizontal="8dp"
+                    app:chipSpacingVertical="8dp">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/carChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🚗 Car"
+                        android:checkable="true"
+                        app:chipBackgroundColor="@color/chip_background"
+                        app:chipStrokeColor="@color/divider"
+                        app:chipStrokeWidth="1dp"
+                        android:textColor="@color/text_primary"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/bikeChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🏍️ Bike"
+                        android:checkable="true"
+                        app:chipBackgroundColor="@color/chip_background"
+                        app:chipStrokeColor="@color/divider"
+                        app:chipStrokeWidth="1dp"
+                        android:textColor="@color/text_primary"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/truckChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🚛 Truck"
+                        android:checkable="true"
+                        app:chipBackgroundColor="@color/chip_background"
+                        app:chipStrokeColor="@color/divider"
+                        app:chipStrokeWidth="1dp"
+                        android:textColor="@color/text_primary"/>
+                </com.google.android.material.chip.ChipGroup>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Request Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/requestButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:text="Request Tow Truck"
-            android:padding="12dp"/>
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="28dp"
+            app:elevation="8dp"
+            app:backgroundTint="@color/accent_blue"
+            android:textColor="@color/white"
+            app:icon="@drawable/ic_tow"
+            app:iconSize="24dp"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"/>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView> 

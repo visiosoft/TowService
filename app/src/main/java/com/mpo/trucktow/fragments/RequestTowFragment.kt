@@ -344,10 +344,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             binding.distanceText.text = distanceText
             binding.estimatedTimeText.text = durationText
             binding.estimatedCostText.text = estimatedCost
-            binding.routeStatusText.text = "✅ Route calculated ($routeType)"
-            
-            // Show success message
-            Toast.makeText(requireContext(), "Route: $distanceText, $durationText, Cost: $estimatedCost", Toast.LENGTH_SHORT).show()
             
             Log.d("RequestTowFragment", "Route displayed successfully: $distanceText, $durationText, Cost: $estimatedCost")
             
@@ -397,10 +393,6 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             binding.distanceText.text = distanceText
             binding.estimatedTimeText.text = durationText
             binding.estimatedCostText.text = estimatedCost
-            binding.routeStatusText.text = "✅ Route calculated ($routeType)"
-            
-            // Show success message
-            Toast.makeText(requireContext(), "Route: $distanceText, $durationText, Cost: $estimatedCost", Toast.LENGTH_SHORT).show()
             
             Log.d("RequestTowFragment", "Route displayed successfully: $distanceText, $durationText, Cost: $estimatedCost")
             
