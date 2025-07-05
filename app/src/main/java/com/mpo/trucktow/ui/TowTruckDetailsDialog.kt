@@ -82,7 +82,6 @@ class TowTruckDetailsDialog : DialogFragment() {
             truckRating.text = "⭐ ${truck.rating}"
             truckDistance.text = "${truck.distance} km away"
             vehicleType.text = truck.vehicleType
-            phoneNumber.text = truck.phoneNumber.ifEmpty { "Not available" }
             
             // Set availability status
             if (truck.isAvailable) {
@@ -92,8 +91,6 @@ class TowTruckDetailsDialog : DialogFragment() {
                 availabilityChip.text = "Busy"
                 availabilityChip.setChipBackgroundColorResource(R.color.red_500)
             }
-            
-
             
             // Set vehicle capacity based on type
             val capacity = when {
@@ -111,33 +108,6 @@ class TowTruckDetailsDialog : DialogFragment() {
             // Close button
             closeButton.setOnClickListener {
                 dismiss()
-            }
-            
-            // Call button
-            callButton.setOnClickListener {
-                towTruck?.let { truck ->
-                    if (truck.phoneNumber.isNotEmpty()) {
-                        val intent = Intent(Intent.ACTION_DIAL)
-                        intent.data = Uri.parse("tel:${truck.phoneNumber}")
-                        startActivity(intent)
-                    } else {
-                        Toast.makeText(context, "Phone number not available", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-            
-            // Message button
-            messageButton.setOnClickListener {
-                towTruck?.let { truck ->
-                    if (truck.phoneNumber.isNotEmpty()) {
-                        val intent = Intent(Intent.ACTION_SENDTO)
-                        intent.data = Uri.parse("smsto:${truck.phoneNumber}")
-                        intent.putExtra("sms_body", "Hi, I need towing assistance. Can you help?")
-                        startActivity(intent)
-                    } else {
-                        Toast.makeText(context, "Phone number not available", Toast.LENGTH_SHORT).show()
-                    }
-                }
             }
             
             // Reserve button
