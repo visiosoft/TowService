@@ -82,10 +82,12 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
             // Setup UI elements
+            view.findViewById<MaterialButton>(R.id.supportButton)?.setOnClickListener {
+                // TODO: Implement support functionality
+                Toast.makeText(context, "Support feature coming soon!", Toast.LENGTH_SHORT).show()
+            }
 
-
-
-            view.findViewById<FloatingActionButton>(R.id.updateLocationButton)?.setOnClickListener {
+            view.findViewById<FloatingActionButton>(R.id.locationUpdateButton)?.setOnClickListener {
                 updateCurrentLocation()
             }
 
@@ -359,7 +361,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private fun updateCurrentLocation() {
         if (hasLocationPermission()) {
             // Show loading indicator
-            view?.findViewById<FloatingActionButton>(R.id.updateLocationButton)?.isEnabled = false
+            view?.findViewById<FloatingActionButton>(R.id.locationUpdateButton)?.isEnabled = false
             Toast.makeText(context, "Updating location...", Toast.LENGTH_SHORT).show()
             
             // Get fresh location with proper permission check
@@ -381,14 +383,14 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 }
                 
                 // Re-enable button
-                view?.findViewById<FloatingActionButton>(R.id.updateLocationButton)?.isEnabled = true
+                view?.findViewById<FloatingActionButton>(R.id.locationUpdateButton)?.isEnabled = true
             }.addOnFailureListener {
                 Toast.makeText(context, "Failed to update location", Toast.LENGTH_SHORT).show()
-                view?.findViewById<FloatingActionButton>(R.id.updateLocationButton)?.isEnabled = true
+                view?.findViewById<FloatingActionButton>(R.id.locationUpdateButton)?.isEnabled = true
             }
             } catch (e: SecurityException) {
                 Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
-                view?.findViewById<FloatingActionButton>(R.id.updateLocationButton)?.isEnabled = true
+                view?.findViewById<FloatingActionButton>(R.id.locationUpdateButton)?.isEnabled = true
             }
         } else {
             Toast.makeText(context, "Location permission required", Toast.LENGTH_SHORT).show()

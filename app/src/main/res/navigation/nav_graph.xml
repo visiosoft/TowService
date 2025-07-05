@@ -29,8 +29,7 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.mpo.trucktow.fragments.HomeFragment"
-        android:label="Home">
+        android:name="com.mpo.trucktow.fragments.HomeFragment">
         <action
             android:id="@+id/action_home_to_profile"
             app:destination="@id/profileFragment" />

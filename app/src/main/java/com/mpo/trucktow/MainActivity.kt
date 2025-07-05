@@ -9,16 +9,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mpo.trucktow.database.DatabaseHelper
 
 class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
-    private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var sessionManager: SessionManager
     private lateinit var dbHelper: DatabaseHelper
 
@@ -50,23 +46,10 @@ class MainActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         dbHelper = DatabaseHelper(this)
 
-        // Set up the ActionBar
-        setSupportActionBar(findViewById(R.id.toolbar))
-
         // Set up the Navigation
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
-
-        // Configure the ActionBar
-        appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.homeFragment,
-                R.id.profileFragment,
-                R.id.requestTowFragment
-            )
-        )
-        setupActionBarWithNavController(navController, appBarConfiguration)
 
         // Set up the Bottom Navigation
         findViewById<BottomNavigationView>(R.id.bottom_navigation)?.let { bottomNav ->
@@ -131,7 +114,5 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
-    }
+
 }
