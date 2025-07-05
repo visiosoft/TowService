@@ -1,16 +1,19 @@
 package com.mpo.trucktow.fragments
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -29,6 +32,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.card.MaterialCardView
 import com.mpo.trucktow.R
 import com.mpo.trucktow.models.TowTruck
 import com.mpo.trucktow.ui.TowTruckDetailsDialog
@@ -82,9 +86,24 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
             // Setup UI elements
-            view.findViewById<MaterialButton>(R.id.supportButton)?.setOnClickListener {
-                // TODO: Implement support functionality
-                Toast.makeText(context, "Support feature coming soon!", Toast.LENGTH_SHORT).show()
+            view.findViewById<MaterialCardView>(R.id.supportButtonCard)?.setOnClickListener {
+                // Add visual feedback with animation
+                val supportCard = view.findViewById<MaterialCardView>(R.id.supportButtonCard)
+                supportCard?.animate()
+                    ?.scaleX(0.95f)
+                    ?.scaleY(0.95f)
+                    ?.setDuration(100)
+                    ?.withEndAction {
+                        supportCard.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(100)
+                            .start()
+                    }
+                    ?.start()
+
+                // Show enhanced support dialog
+                showSupportDialog()
             }
 
             view.findViewById<FloatingActionButton>(R.id.locationUpdateButton)?.setOnClickListener {
@@ -396,6 +415,44 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             Toast.makeText(context, "Location permission required", Toast.LENGTH_SHORT).show()
             requestLocationPermission()
         }
+    }
+
+    private fun showSupportDialog() {
+        val options = arrayOf("📞 Call Support", "💬 Live Chat", "📧 Email Support", "❓ FAQ")
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("🛟 Support Options")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        // Call Support
+                        val intent = Intent(Intent.ACTION_DIAL).apply {
+                            data = Uri.parse("tel:+1800SUPPORT")
+                        }
+                        startActivity(intent)
+                    }
+                    1 -> {
+                        // Live Chat
+                        Toast.makeText(context, "💬 Live chat feature coming soon!", Toast.LENGTH_LONG).show()
+                    }
+                    2 -> {
+                        // Email Support
+                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                            data = Uri.parse("mailto:support@trucktow.com")
+                            putExtra(Intent.EXTRA_SUBJECT, "Support Request")
+                        }
+                        startActivity(intent)
+                    }
+                    3 -> {
+                        // FAQ
+                        Toast.makeText(context, "📚 FAQ section coming soon!", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     override fun onDestroyView() {
