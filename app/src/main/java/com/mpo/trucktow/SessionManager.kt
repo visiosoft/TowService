@@ -54,4 +54,9 @@ class SessionManager(context: Context) {
         editor.remove(KEY_USER_PASSWORD)
         editor.apply()
     }
+
+    fun isGoogleSignIn(): Boolean {
+        val password = getSavedPassword()
+        return password == "google_sign_in"
+    }
 } 

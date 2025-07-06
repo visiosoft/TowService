@@ -12,11 +12,15 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mpo.trucktow.database.DatabaseHelper
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 
 class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var sessionManager: SessionManager
     private lateinit var dbHelper: DatabaseHelper
+    private lateinit var mGoogleSignInClient: GoogleSignInClient
 
     // Permission request launcher
     private val locationPermissionRequest = registerForActivityResult(
@@ -38,6 +42,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Configure Google Sign-In
+        configureGoogleSignIn()
 
         // Request permissions at startup
         requestLocationPermissions()
@@ -90,15 +97,22 @@ class MainActivity : AppCompatActivity() {
             val savedPassword = sessionManager.getSavedPassword()
             
             if (savedEmail != null && savedPassword != null) {
-                // Verify credentials with database
-                if (dbHelper.checkUser(savedEmail, savedPassword)) {
-                    // Auto-login successful
+                // Check if it's a Google Sign-In
+                if (sessionManager.isGoogleSignIn()) {
+                    // Google Sign-In user - auto-login successful
                     Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show()
                     navController.navigate(R.id.homeFragment)
                 } else {
-                    // Saved credentials are invalid, clear them
-                    sessionManager.logout()
-                    Toast.makeText(this, "Session expired. Please login again.", Toast.LENGTH_SHORT).show()
+                    // Regular user - verify credentials with database
+                    if (dbHelper.checkUser(savedEmail, savedPassword)) {
+                        // Auto-login successful
+                        Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show()
+                        navController.navigate(R.id.homeFragment)
+                    } else {
+                        // Saved credentials are invalid, clear them
+                        sessionManager.logout()
+                        Toast.makeText(this, "Session expired. Please login again.", Toast.LENGTH_SHORT).show()
+                    }
                 }
             } else {
                 // No saved credentials
@@ -114,5 +128,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun configureGoogleSignIn() {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .build()
+
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
+    }
+
+    fun getGoogleSignInClient(): GoogleSignInClient {
+        return mGoogleSignInClient
+    }
 
 }
