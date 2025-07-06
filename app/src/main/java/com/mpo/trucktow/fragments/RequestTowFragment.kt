@@ -5,9 +5,12 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -63,6 +66,12 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     // Countdown timer handler
     private var countdownHandler: Handler? = null
     private var countdownRunnable: Runnable? = null
+    
+    // MediaPlayer for tick sound
+    private var tickMediaPlayer: MediaPlayer? = null
+    
+    // Vibrator for haptic feedback
+    private var vibrator: Vibrator? = null
     
     private val AUTOCOMPLETE_REQUEST_CODE_PICKUP = 1
     private val AUTOCOMPLETE_REQUEST_CODE_DROP = 2
@@ -531,6 +540,10 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         // Show countdown overlay
         showCountdownOverlay()
         
+        // Initialize MediaPlayer for tick sound and vibrator
+        initializeTickSound()
+        initializeVibrator()
+        
         // Start 2 minute countdown (120 seconds)
         var timeLeft = 120
         countdownHandler = Handler(Looper.getMainLooper())
@@ -538,13 +551,19 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             override fun run() {
                 if (timeLeft > 0 && isAdded && !isDetached) {
                     updateCountdownText(timeLeft)
+                    playTickSound(timeLeft)
                     timeLeft--
                     countdownHandler?.postDelayed(this, 1000) // Update every second
                 } else {
-                    // Countdown finished or fragment detached, clean up
-                    hideCountdownOverlay()
+                    // Countdown finished, play final sound and show success
                     if (isAdded && !isDetached) {
-                        showRequestSuccess()
+                        playTickSound(0) // Play final sound when counter completes
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            hideCountdownOverlay()
+                            releaseTickSound()
+                            releaseVibrator()
+                            showRequestSuccess()
+                        }, 1000) // Wait 1 second after final sound
                     }
                 }
             }
@@ -592,6 +611,100 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             Log.e("RequestTowFragment", "Error updating countdown text", e)
         }
     }
+    
+    private fun initializeTickSound() {
+        try {
+            tickMediaPlayer = MediaPlayer.create(requireContext(), R.raw.tick)
+            tickMediaPlayer?.isLooping = false
+        } catch (e: Exception) {
+            Log.e("RequestTowFragment", "Error initializing tick sound", e)
+        }
+    }
+    
+
+    
+    private fun releaseTickSound() {
+        try {
+            tickMediaPlayer?.release()
+            tickMediaPlayer = null
+        } catch (e: Exception) {
+            Log.e("RequestTowFragment", "Error releasing tick sound", e)
+        }
+    }
+    
+    private fun initializeVibrator() {
+        try {
+            vibrator = requireContext().getSystemService(android.content.Context.VIBRATOR_SERVICE) as Vibrator
+        } catch (e: Exception) {
+            Log.e("RequestTowFragment", "Error initializing vibrator", e)
+        }
+    }
+    
+    private fun playTickSound(timeLeft: Int) {
+        try {
+            // Play sound
+            tickMediaPlayer?.let { player ->
+                if (player.isPlaying) {
+                    player.stop()
+                }
+                player.seekTo(0)
+                player.start()
+            }
+            
+            // Add vibration with counter pattern
+            vibrator?.let { vib ->
+                if (vib.hasVibrator()) {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        // Create vibration pattern based on countdown progress
+                        val vibrationPattern = createVibrationPattern(timeLeft)
+                        vib.vibrate(VibrationEffect.createWaveform(vibrationPattern, -1))
+                    } else {
+                        @Suppress("DEPRECATION")
+                        // For older Android versions, use simple vibration
+                        vib.vibrate(250)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("RequestTowFragment", "Error playing tick sound or vibration", e)
+        }
+    }
+    
+    private fun createVibrationPattern(timeLeft: Int): LongArray {
+        return when {
+            timeLeft <= 10 && timeLeft > 0 -> {
+                // Last 10 seconds: Very strong, rapid vibration pattern
+                longArrayOf(0, 500, 100, 500, 100, 500, 100, 500)
+            }
+            timeLeft <= 30 && timeLeft > 10 -> {
+                // Last 30 seconds: Strong vibration with pattern
+                longArrayOf(0, 400, 100, 400, 100, 400)
+            }
+            timeLeft <= 60 && timeLeft > 30 -> {
+                // Last minute: Medium vibration
+                longArrayOf(0, 300, 100, 300)
+            }
+            timeLeft == 0 -> {
+                // Countdown complete: Strong celebration pattern
+                longArrayOf(0, 800, 200, 800, 200, 800, 200, 800)
+            }
+            else -> {
+                // Normal countdown: Strong vibration
+                longArrayOf(0, 250)
+            }
+        }
+    }
+    
+    private fun releaseVibrator() {
+        try {
+            vibrator?.cancel()
+            vibrator = null
+        } catch (e: Exception) {
+            Log.e("RequestTowFragment", "Error releasing vibrator", e)
+        }
+    }
+    
+
     
     private fun showRequestSuccess() {
         // Show success message
@@ -1033,6 +1146,10 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         }
         countdownHandler = null
         countdownRunnable = null
+        
+        // Release tick sound and vibrator
+        releaseTickSound()
+        releaseVibrator()
         
         // Stop location updates
         fusedLocationClient.removeLocationUpdates(object : LocationCallback() {})

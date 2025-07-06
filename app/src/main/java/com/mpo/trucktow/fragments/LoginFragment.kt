@@ -16,6 +16,7 @@ import com.mpo.trucktow.database.DatabaseHelper
 import com.mpo.trucktow.SessionManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -28,6 +29,7 @@ class LoginFragment : Fragment() {
     private lateinit var loginButton: MaterialButton
     private lateinit var googleSignInButton: MaterialButton
     private lateinit var signupTextView: View
+    private lateinit var forgotPasswordText: View
     private lateinit var dbHelper: DatabaseHelper
     private lateinit var sessionManager: SessionManager
     private lateinit var mGoogleSignInClient: GoogleSignInClient
@@ -60,6 +62,7 @@ class LoginFragment : Fragment() {
         loginButton = view.findViewById(R.id.loginButton)
         googleSignInButton = view.findViewById(R.id.googleSignInButton)
         signupTextView = view.findViewById(R.id.signupTextView)
+        forgotPasswordText = view.findViewById(R.id.forgotPasswordText)
 
         // Initialize Google Sign-In client
         mGoogleSignInClient = (requireActivity() as com.mpo.trucktow.MainActivity).getGoogleSignInClient()
@@ -85,6 +88,11 @@ class LoginFragment : Fragment() {
         signupTextView.setOnClickListener {
             // Navigate to signup using Navigation component
             findNavController().navigate(R.id.action_login_to_signup)
+        }
+
+        // Set forgot password click listener
+        forgotPasswordText.setOnClickListener {
+            showForgotPasswordDialog()
         }
 
         // Set Google Sign-In button click listener
@@ -132,5 +140,17 @@ class LoginFragment : Fragment() {
             Log.w("GoogleSignIn", "signInResult:failed code=" + e.statusCode)
             Toast.makeText(context, "Google Sign-In failed: ${e.statusMessage}", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun showForgotPasswordDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Forgot Password")
+            .setMessage("Enter your email address and we'll send you a link to reset your password.")
+            .setPositiveButton("Send Reset Link") { _, _ ->
+                // TODO: Implement password reset functionality
+                Toast.makeText(context, "Password reset link sent to your email", Toast.LENGTH_LONG).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 } 

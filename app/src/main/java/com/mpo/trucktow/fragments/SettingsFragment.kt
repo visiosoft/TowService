@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mpo.trucktow.R
+import com.mpo.trucktow.SessionManager
 
 class SettingsFragment : Fragment() {
 
@@ -37,6 +39,36 @@ class SettingsFragment : Fragment() {
 
         view.findViewById<MaterialCardView>(R.id.aboutCard)?.setOnClickListener {
             // TODO: Navigate to about section
+        }
+
+        // Setup logout functionality
+        view.findViewById<MaterialCardView>(R.id.logoutCard)?.setOnClickListener {
+            showLogoutConfirmationDialog()
+        }
+    }
+
+    private fun showLogoutConfirmationDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Logout")
+            .setMessage("Are you sure you want to logout? You will need to sign in again.")
+            .setPositiveButton("Logout") { _, _ ->
+                performLogout()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun performLogout() {
+        try {
+            // Clear session data
+            val sessionManager = SessionManager(requireContext())
+            sessionManager.logout()
+
+            // Navigate to login fragment with proper navigation
+            findNavController().navigate(R.id.action_settings_to_login)
+        } catch (e: Exception) {
+            // Handle any errors during logout
+            e.printStackTrace()
         }
     }
 } 
