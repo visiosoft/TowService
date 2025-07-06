@@ -5,6 +5,15 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
+// User data class
+data class User(
+    val id: Int,
+    val email: String,
+    val password: String,
+    val name: String,
+    val phone: String
+)
+
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
@@ -80,5 +89,31 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val exists = cursor.count > 0
         cursor.close()
         return exists
+    }
+
+    fun getUserByEmail(email: String): User? {
+        val db = this.readableDatabase
+        val cursor = db.query(
+            TABLE_USERS,
+            arrayOf(COLUMN_ID, COLUMN_EMAIL, COLUMN_PASSWORD, COLUMN_NAME, COLUMN_PHONE),
+            "$COLUMN_EMAIL = ?",
+            arrayOf(email),
+            null, null, null
+        )
+        
+        return if (cursor.moveToFirst()) {
+            val user = User(
+                id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                email = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
+                password = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD)),
+                name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
+                phone = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE))
+            )
+            cursor.close()
+            user
+        } else {
+            cursor.close()
+            null
+        }
     }
 } 

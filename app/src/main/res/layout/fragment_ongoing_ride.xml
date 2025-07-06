@@ -141,46 +141,7 @@
                     android:textStyle="bold"/>
             </LinearLayout>
 
-            <!-- Communication Buttons Row -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="12dp">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Contact Driver"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_secondary"
-                    android:textStyle="bold"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/callButton"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="8dp"
-                    app:icon="@android:drawable/ic_menu_call"
-                    app:iconSize="18dp"
-                    app:cornerRadius="20dp"
-                    app:backgroundTint="@color/accent_green"
-                    app:iconTint="@color/white"
-                    style="@style/Widget.MaterialComponents.Button"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/messageButton"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    app:icon="@android:drawable/ic_menu_send"
-                    app:iconSize="18dp"
-                    app:cornerRadius="20dp"
-                    app:backgroundTint="@color/accent_blue"
-                    app:iconTint="@color/white"
-                    style="@style/Widget.MaterialComponents.Button"/>
-            </LinearLayout>
 
             <!-- Vehicle Info Section -->
             <LinearLayout

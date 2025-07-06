@@ -3,6 +3,8 @@ package com.mpo.trucktow.fragments
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.method.HideReturnsTransformationMethod
+import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +18,7 @@ import com.mpo.trucktow.database.DatabaseHelper
 import com.mpo.trucktow.SessionManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -26,6 +29,7 @@ import com.google.android.gms.tasks.Task
 class LoginFragment : Fragment() {
     private lateinit var emailEditText: TextInputEditText
     private lateinit var passwordEditText: TextInputEditText
+    private lateinit var passwordLayout: TextInputLayout
     private lateinit var loginButton: MaterialButton
     private lateinit var googleSignInButton: MaterialButton
     private lateinit var signupTextView: View
@@ -59,6 +63,7 @@ class LoginFragment : Fragment() {
         // Initialize views
         emailEditText = view.findViewById(R.id.emailEditText)
         passwordEditText = view.findViewById(R.id.passwordEditText)
+        passwordLayout = view.findViewById(R.id.passwordLayout)
         loginButton = view.findViewById(R.id.loginButton)
         googleSignInButton = view.findViewById(R.id.googleSignInButton)
         signupTextView = view.findViewById(R.id.signupTextView)
@@ -66,6 +71,9 @@ class LoginFragment : Fragment() {
 
         // Initialize Google Sign-In client
         mGoogleSignInClient = (requireActivity() as com.mpo.trucktow.MainActivity).getGoogleSignInClient()
+
+        // Setup password toggle functionality
+        setupPasswordToggle()
 
         // Set click listeners
         loginButton.setOnClickListener {
@@ -98,6 +106,23 @@ class LoginFragment : Fragment() {
         // Set Google Sign-In button click listener
         googleSignInButton.setOnClickListener {
             startGoogleSignIn()
+        }
+    }
+
+    private fun setupPasswordToggle() {
+        // Setup password toggle for password field
+        passwordLayout.setEndIconOnClickListener {
+            if (passwordEditText.transformationMethod is PasswordTransformationMethod) {
+                // Show password
+                passwordEditText.transformationMethod = HideReturnsTransformationMethod.getInstance()
+                passwordLayout.endIconDrawable = requireContext().getDrawable(android.R.drawable.ic_menu_view)
+            } else {
+                // Hide password
+                passwordEditText.transformationMethod = PasswordTransformationMethod.getInstance()
+                passwordLayout.endIconDrawable = requireContext().getDrawable(android.R.drawable.ic_menu_view)
+            }
+            // Move cursor to end
+            passwordEditText.setSelection(passwordEditText.text?.length ?: 0)
         }
     }
 

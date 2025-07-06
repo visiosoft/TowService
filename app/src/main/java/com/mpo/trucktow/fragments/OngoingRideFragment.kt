@@ -130,7 +130,6 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
         setupMap()
         setupDriverInfo()
         setupVehicleInfo()
-        setupCommunicationButtons()
         setupCancelButton()
         
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
@@ -285,19 +284,7 @@ class OngoingRideFragment : Fragment(), OnMapReadyCallback {
         // Glide.with(this).load(vehicle.imageUrl).into(binding.vehicleImage)
     }
 
-    private fun setupCommunicationButtons() {
-        binding.callButton.setOnClickListener {
-            val intent = Intent(Intent.ACTION_DIAL).apply {
-                data = Uri.parse("tel:${driver.phoneNumber}")
-            }
-            startActivity(intent)
-        }
 
-        binding.messageButton.setOnClickListener {
-            // Implement messaging functionality
-            Toast.makeText(context, "Messaging feature coming soon!", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     private fun setupCancelButton() {
         binding.cancelRideButton.setOnClickListener {
