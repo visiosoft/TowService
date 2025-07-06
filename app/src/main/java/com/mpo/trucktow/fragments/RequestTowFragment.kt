@@ -192,14 +192,21 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     
     private fun updateRequestButtonState() {
         val isReady = pickupLocation != null && dropLocation != null && getSelectedVehicleType() != null
-        binding.requestButton.isEnabled = isReady
+        
+        // Always keep button enabled, but show different visual states
+        binding.requestButton.isEnabled = true
         
         if (isReady) {
             binding.requestButton.alpha = 1.0f
+            binding.requestButton.text = getString(R.string.request_tow_now_button)
             binding.routeStatusText.text = getString(R.string.ready_to_request)
             binding.routeStatusText.setTextColor(requireContext().getColor(R.color.accent_green))
         } else {
-            binding.requestButton.alpha = 0.6f
+            // Button is still clickable but shows it's not ready
+            binding.requestButton.alpha = 0.8f
+            binding.requestButton.text = getString(R.string.request_tow_now_button)
+            binding.routeStatusText.text = getString(R.string.select_locations_hint)
+            binding.routeStatusText.setTextColor(requireContext().getColor(R.color.text_hint))
         }
     }
     
@@ -473,7 +480,13 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
 
     private fun setupRequestButton() {
         binding.requestButton.setOnClickListener {
-            if (validateInputs()) {
+            Log.d("RequestTowFragment", "Request button clicked")
+            
+            // Always run validation to show error messages
+            val isValid = validateInputs()
+            
+            if (isValid) {
+                Log.d("RequestTowFragment", "Validation passed, proceeding with request")
                 // Show loading state
                 showRequestLoadingState()
                 
@@ -482,8 +495,23 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
                     // Show countdown after request is sent
                     startCountdownTimer()
                 }, 2000)
+            } else {
+                Log.d("RequestTowFragment", "Validation failed, showing error messages")
+                // Error messages are already shown in validateInputs()
             }
         }
+    }
+    
+    // Test method to verify validation is working
+    private fun testValidation() {
+        Log.d("RequestTowFragment", "=== VALIDATION TEST ===")
+        Log.d("RequestTowFragment", "Pickup location: $pickupLocation")
+        Log.d("RequestTowFragment", "Drop location: $dropLocation")
+        Log.d("RequestTowFragment", "Selected vehicle type: ${getSelectedVehicleType()}")
+        Log.d("RequestTowFragment", "Car chip checked: ${binding.carChip.isChecked}")
+        Log.d("RequestTowFragment", "Bike chip checked: ${binding.bikeChip.isChecked}")
+        Log.d("RequestTowFragment", "Truck chip checked: ${binding.truckChip.isChecked}")
+        Log.d("RequestTowFragment", "=== END VALIDATION TEST ===")
     }
     
 
@@ -691,63 +719,153 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
 
     private fun validateInputs(): Boolean {
         var isValid = true
+        val missingFields = mutableListOf<String>()
+        
+        Log.d("RequestTowFragment", "Starting validation...")
         
         // Validate pickup location
         if (pickupLocation == null) {
+            Log.d("RequestTowFragment", "Pickup location is null")
             showValidationError(binding.pickupLocationEditText, "Please select a pickup location")
+            missingFields.add("Pickup Location")
             isValid = false
         } else {
+            Log.d("RequestTowFragment", "Pickup location is valid")
             clearValidationError(binding.pickupLocationEditText)
         }
         
         // Validate drop location
         if (dropLocation == null) {
+            Log.d("RequestTowFragment", "Drop location is null")
             showValidationError(binding.dropLocationEditText, "Please select a drop location")
+            missingFields.add("Drop Location")
             isValid = false
         } else {
+            Log.d("RequestTowFragment", "Drop location is valid")
             clearValidationError(binding.dropLocationEditText)
         }
         
         // Validate vehicle type selection
         val selectedVehicleType = getSelectedVehicleType()
         if (selectedVehicleType == null) {
+            Log.d("RequestTowFragment", "Vehicle type is null")
             showVehicleTypeError()
+            missingFields.add("Vehicle Type")
             isValid = false
         } else {
+            Log.d("RequestTowFragment", "Vehicle type is valid: $selectedVehicleType")
             clearVehicleTypeError()
         }
         
-        // Show overall error message if validation fails
+        // Show specific error message if validation fails
         if (!isValid) {
-            binding.routeStatusText.text = getString(R.string.please_complete_fields)
-            binding.routeStatusText.setTextColor(requireContext().getColor(R.color.red_500))
-            Toast.makeText(context, getString(R.string.please_complete_fields), Toast.LENGTH_LONG).show()
+            Log.d("RequestTowFragment", "Validation failed. Missing fields: $missingFields")
+            val errorMessage = buildMissingFieldsMessage(missingFields)
+            Log.d("RequestTowFragment", "Error message: $errorMessage")
+            
+            // Show error message in status text
+            try {
+                binding.routeStatusText.text = errorMessage
+                binding.routeStatusText.setTextColor(requireContext().getColor(R.color.red_500))
+                Log.d("RequestTowFragment", "Updated routeStatusText successfully")
+            } catch (e: Exception) {
+                Log.e("RequestTowFragment", "Error updating routeStatusText", e)
+            }
+            
+            // Show prominent toast message
+            val toastMessage = "❌ Missing required fields: ${missingFields.joinToString(", ")}"
+            Toast.makeText(context, toastMessage, Toast.LENGTH_LONG).show()
+            Log.d("RequestTowFragment", "Showed toast: $toastMessage")
+            
+            // Add visual feedback to the button
+            binding.requestButton.alpha = 0.7f
+            binding.requestButton.text = "⚠️ Complete Required Fields"
+            
+            // Reset button after 3 seconds
+            Handler(Looper.getMainLooper()).postDelayed({
+                binding.requestButton.alpha = 1.0f
+                binding.requestButton.text = getString(R.string.request_tow_now_button)
+            }, 3000)
+            
+        } else {
+            Log.d("RequestTowFragment", "Validation passed")
         }
         
         return isValid
     }
     
+    private fun buildMissingFieldsMessage(missingFields: List<String>): String {
+        return when {
+            missingFields.size == 1 -> "❌ Missing: ${missingFields.first()}"
+            missingFields.size == 2 -> "❌ Missing: ${missingFields[0]} and ${missingFields[1]}"
+            missingFields.size == 3 -> "❌ Missing: ${missingFields[0]}, ${missingFields[1]}, and ${missingFields[2]}"
+            else -> getString(R.string.please_complete_fields)
+        }
+    }
+    
     private fun showValidationError(editText: com.google.android.material.textfield.TextInputEditText, message: String) {
-        val parent = editText.parent.parent as? com.google.android.material.textfield.TextInputLayout
-        parent?.error = message
-        parent?.boxStrokeColor = requireContext().getColor(R.color.red_500)
+        try {
+            val parent = editText.parent.parent as? com.google.android.material.textfield.TextInputLayout
+            parent?.error = message
+            parent?.boxStrokeColor = requireContext().getColor(R.color.red_500)
+            Log.d("RequestTowFragment", "Set validation error: $message")
+        } catch (e: Exception) {
+            Log.e("RequestTowFragment", "Error setting validation error", e)
+        }
     }
     
     private fun clearValidationError(editText: com.google.android.material.textfield.TextInputEditText) {
-        val parent = editText.parent.parent as? com.google.android.material.textfield.TextInputLayout
-        parent?.error = null
-        parent?.boxStrokeColor = requireContext().getColor(R.color.accent_blue)
+        try {
+            val parent = editText.parent.parent as? com.google.android.material.textfield.TextInputLayout
+            parent?.error = null
+            parent?.boxStrokeColor = requireContext().getColor(R.color.accent_blue)
+            Log.d("RequestTowFragment", "Cleared validation error")
+        } catch (e: Exception) {
+            Log.e("RequestTowFragment", "Error clearing validation error", e)
+        }
     }
     
     private fun showVehicleTypeError() {
-        // binding.vehicleTypeChipGroup.setChipBackgroundColorResource(R.color.red_500) // Not valid
         // Add a temporary error indicator
         binding.vehicleTypeChipGroup.alpha = 0.7f
+        
+        // Add a more prominent shake animation to draw attention
+        binding.vehicleTypeChipGroup.animate()
+            .translationX(15f)
+            .setDuration(150)
+            .withEndAction {
+                binding.vehicleTypeChipGroup.animate()
+                    .translationX(-15f)
+                    .setDuration(150)
+                    .withEndAction {
+                        binding.vehicleTypeChipGroup.animate()
+                            .translationX(15f)
+                            .setDuration(150)
+                            .withEndAction {
+                                binding.vehicleTypeChipGroup.animate()
+                                    .translationX(0f)
+                                    .setDuration(150)
+                                    .start()
+                            }
+                            .start()
+                    }
+                    .start()
+            }
+            .start()
+        
+        // Add a red border effect
+        binding.vehicleTypeChipGroup.setBackgroundColor(requireContext().getColor(R.color.red_500))
+        binding.vehicleTypeChipGroup.alpha = 0.1f
+        
+        // Remove the red background after animation
+        Handler(Looper.getMainLooper()).postDelayed({
+            binding.vehicleTypeChipGroup.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        }, 1000)
     }
     
     private fun clearVehicleTypeError() {
-        // binding.vehicleTypeChipGroup.setChipBackgroundColorResource(R.color.chip_background) // Not valid
         binding.vehicleTypeChipGroup.alpha = 1.0f
+        binding.vehicleTypeChipGroup.translationX = 0f
     }
     
     private fun getSelectedVehicleType(): String? {

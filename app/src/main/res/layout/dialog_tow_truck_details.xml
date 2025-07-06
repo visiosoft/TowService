@@ -60,19 +60,11 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
 
-                                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_tow_truck"
-                        android:background="@drawable/circle_bg"
-                        android:padding="8dp"
-                        app:tint="#1976D2" />
-
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
                     android:orientation="vertical">
 
                     <TextView
@@ -129,6 +121,16 @@
                     app:chipStrokeWidth="1dp"
                     android:textColor="@android:color/white"
                     android:textStyle="bold" />
+
+                <!-- Tow Truck Icon moved to right side -->
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_tow_truck"
+                    android:background="@drawable/circle_bg"
+                    android:padding="8dp"
+                    app:tint="#1976D2"
+                    android:layout_marginStart="12dp" />
             </LinearLayout>
 
             <!-- Vehicle Details -->

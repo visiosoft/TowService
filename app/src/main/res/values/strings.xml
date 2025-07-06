@@ -9,6 +9,9 @@
     <string name="route_calculated">✅ Route calculated</string>
     <string name="route_calculated_offline">✅ Route calculated (offline)</string>
     <string name="please_complete_fields">⚠️ Please complete all required fields</string>
+    <string name="missing_pickup_location">⚠️ Please select a pickup location</string>
+    <string name="missing_drop_location">⚠️ Please select a drop location</string>
+    <string name="missing_vehicle_type">⚠️ Please select a vehicle type</string>
     <string name="sending_request">📡 Sending request to nearby drivers...</string>
     <string name="tow_truck_found">✅ Tow truck found! Redirecting...</string>
     <string name="success_message">Tow truck dispatched successfully!</string>

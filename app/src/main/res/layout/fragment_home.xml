@@ -17,7 +17,7 @@
             android:layout_height="64dp"
             android:paddingHorizontal="16dp">
 
-            <!-- App Name (Centered) -->
+            <!-- App Name (Left Side) -->
             <TextView
                 android:id="@+id/appNameText"
                 android:layout_width="wrap_content"
@@ -26,8 +26,8 @@
                 android:textSize="22sp"
                 android:textStyle="bold"
                 android:textColor="#000000"
+                android:layout_marginStart="8dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
 
