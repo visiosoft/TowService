@@ -67,6 +67,11 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     private var countdownHandler: Handler? = null
     private var countdownRunnable: Runnable? = null
     
+    // Countdown state tracking
+    private var isCountdownActive = false
+    private var remainingTime = 0
+    private val totalCountdownTime = 120 // 2 minutes in seconds
+    
     // MediaPlayer for tick sound
     private var tickMediaPlayer: MediaPlayer? = null
     
@@ -125,6 +130,7 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         setupPaymentMethods()
         setupRequestButton()
         setupUpdateLocationButtons()
+        checkForActiveCountdown()
     }
 
     private fun setupMaps() {
@@ -621,18 +627,21 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         initializeVibrator()
         
         // Start 2 minute countdown (120 seconds)
-        var timeLeft = 120
+        remainingTime = totalCountdownTime
+        isCountdownActive = true
         countdownHandler = Handler(Looper.getMainLooper())
         countdownRunnable = object : Runnable {
             override fun run() {
-                if (timeLeft > 0 && isAdded && !isDetached) {
-                    updateCountdownText(timeLeft)
-                    playTickSound(timeLeft)
-                    timeLeft--
+                if (remainingTime > 0 && isAdded && !isDetached) {
+                    updateCountdownText(remainingTime)
+                    updateButtonWithRemainingTime(remainingTime)
+                    playTickSound(remainingTime)
+                    remainingTime--
                     countdownHandler?.postDelayed(this, 1000) // Update every second
                 } else {
                     // Countdown finished, play final sound and show success
                     if (isAdded && !isDetached) {
+                        isCountdownActive = false
                         playTickSound(0) // Play final sound when counter completes
                         Handler(Looper.getMainLooper()).postDelayed({
                             hideCountdownOverlay()
@@ -662,9 +671,12 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     private fun hideCountdownOverlay() {
         if (isAdded && !isDetached) {
             try {
-                // Hide the countdown dialog
+                // Hide the countdown dialog but keep countdown running
                 val countdownDialog = childFragmentManager.findFragmentByTag("CountdownDialog") as? CountdownDialogFragment
                 countdownDialog?.dismiss()
+                
+                // Don't stop the countdown - let it continue in background
+                // The button will show the remaining time
             } catch (e: Exception) {
                 Log.e("RequestTowFragment", "Error hiding countdown dialog", e)
             }
@@ -682,9 +694,25 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             // Update the countdown dialog text and progress
             val countdownDialog = childFragmentManager.findFragmentByTag("CountdownDialog") as? CountdownDialogFragment
             countdownDialog?.updateTime(timeText)
-            countdownDialog?.updateProgress(secondsLeft, 120) // 120 is total seconds
+            countdownDialog?.updateProgress(secondsLeft, totalCountdownTime)
         } catch (e: Exception) {
             Log.e("RequestTowFragment", "Error updating countdown text", e)
+        }
+    }
+    
+    private fun updateButtonWithRemainingTime(secondsLeft: Int) {
+        if (!isAdded || isDetached) return
+        
+        val minutes = secondsLeft / 60
+        val seconds = secondsLeft % 60
+        val timeText = String.format("%02d:%02d", minutes, seconds)
+        
+        try {
+            binding.requestButton.text = "⏱️ $timeText remaining"
+            binding.requestButton.setIconResource(android.R.drawable.ic_popup_sync)
+            binding.requestButton.isEnabled = false
+        } catch (e: Exception) {
+            Log.e("RequestTowFragment", "Error updating button text", e)
         }
     }
     
@@ -783,6 +811,9 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
 
     
     private fun showRequestSuccess() {
+        // Stop the countdown
+        stopCountdown()
+        
         // Show success message
         binding.routeStatusText.text = getString(R.string.tow_truck_found)
         binding.routeStatusText.setTextColor(requireContext().getColor(R.color.accent_green))
@@ -791,6 +822,7 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         binding.requestButton.text = "Success!"
         binding.requestButton.setIconResource(android.R.drawable.ic_dialog_info)
         binding.requestButton.backgroundTintList = android.content.res.ColorStateList.valueOf(requireContext().getColor(R.color.accent_green))
+        binding.requestButton.isEnabled = false
         
         // Show brief success toast
         Toast.makeText(requireContext(), getString(R.string.success_message), Toast.LENGTH_SHORT).show()
@@ -1227,26 +1259,31 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         return points
     }
 
-
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        
-        // Cancel countdown timer
-        countdownRunnable?.let { runnable ->
-            countdownHandler?.removeCallbacks(runnable)
-        }
+    private fun stopCountdown() {
+        isCountdownActive = false
+        countdownHandler?.removeCallbacksAndMessages(null)
         countdownHandler = null
         countdownRunnable = null
-        
-        // Release tick sound and vibrator
         releaseTickSound()
         releaseVibrator()
-        
-        // Stop location updates
-        fusedLocationClient.removeLocationUpdates(object : LocationCallback() {})
-        
-        // Clear binding
+    }
+    
+    override fun onDestroyView() {
+        super.onDestroyView()
+        stopCountdown()
         _binding = null
+    }
+
+    private fun checkForActiveCountdown() {
+        // Check if there's an active countdown when returning to this fragment
+        if (isCountdownActive && remainingTime > 0) {
+            // Show remaining time on the button
+            updateButtonWithRemainingTime(remainingTime)
+            
+            // Re-enable the countdown timer if it was stopped
+            if (countdownHandler == null) {
+                startCountdownTimer()
+            }
+        }
     }
 } 
