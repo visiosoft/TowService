@@ -60,4 +60,5 @@
     <color name="accent_orange">@color/accent_orange_light</color>
     <color name="background_secondary">@color/background_secondary_light</color>
     <color name="chip_background">@color/chip_background_light</color>
+    <color name="error_red">#F44336</color>
 </resources>

@@ -73,6 +73,9 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
     // Vibrator for haptic feedback
     private var vibrator: Vibrator? = null
     
+    // Payment method selection
+    private var selectedPaymentMethod: String? = null
+    
     private val AUTOCOMPLETE_REQUEST_CODE_PICKUP = 1
     private val AUTOCOMPLETE_REQUEST_CODE_DROP = 2
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -119,6 +122,7 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
 
         setupMaps()
         setupLocationInputs()
+        setupPaymentMethods()
         setupRequestButton()
         setupUpdateLocationButtons()
     }
@@ -199,8 +203,79 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         }
     }
     
+    private fun setupPaymentMethods() {
+        // Card payment option
+        binding.cardPaymentCard.setOnClickListener {
+            selectPaymentMethod("card")
+        }
+        
+        // Cash payment option
+        binding.cashPaymentCard.setOnClickListener {
+            selectPaymentMethod("cash")
+        }
+    }
+    
+    private fun selectPaymentMethod(method: String) {
+        selectedPaymentMethod = method
+        
+        // Update visual selection
+        when (method) {
+            "card" -> {
+                binding.cardPaymentCheck.visibility = View.VISIBLE
+                binding.cashPaymentCheck.visibility = View.GONE
+                binding.cardPaymentCard.strokeColor = requireContext().getColor(R.color.accent_blue)
+                binding.cashPaymentCard.strokeColor = requireContext().getColor(R.color.divider)
+                binding.cardPaymentCard.strokeWidth = 3
+                binding.cashPaymentCard.strokeWidth = 1
+            }
+            "cash" -> {
+                binding.cardPaymentCheck.visibility = View.GONE
+                binding.cashPaymentCheck.visibility = View.VISIBLE
+                binding.cashPaymentCard.strokeColor = requireContext().getColor(R.color.accent_green)
+                binding.cardPaymentCard.strokeColor = requireContext().getColor(R.color.divider)
+                binding.cashPaymentCard.strokeWidth = 3
+                binding.cardPaymentCard.strokeWidth = 1
+            }
+        }
+        
+        // Clear payment method error
+        binding.paymentMethodError.visibility = View.GONE
+        
+        // Update request button state
+        updateRequestButtonState()
+        
+        // Show selection feedback
+        Toast.makeText(requireContext(), "Selected: ${if (method == "card") "Card Payment" else "Cash Payment"}", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun clearPaymentMethodError() {
+        binding.paymentMethodError.visibility = View.GONE
+    }
+    
+    private fun showPaymentMethodError() {
+        binding.paymentMethodError.visibility = View.VISIBLE
+        
+        // Add shake animation to draw attention
+        binding.cardPaymentCard.animate()
+            .translationX(15f)
+            .setDuration(150)
+            .withEndAction {
+                binding.cardPaymentCard.animate()
+                    .translationX(-15f)
+                    .setDuration(150)
+                    .withEndAction {
+                        binding.cardPaymentCard.animate()
+                            .translationX(0f)
+                            .setDuration(150)
+                            .start()
+                    }
+                    .start()
+            }
+            .start()
+    }
+    
     private fun updateRequestButtonState() {
-        val isReady = pickupLocation != null && dropLocation != null && getSelectedVehicleType() != null
+        val isReady = pickupLocation != null && dropLocation != null && getSelectedVehicleType() != null && selectedPaymentMethod != null
         
         // Always keep button enabled, but show different visual states
         binding.requestButton.isEnabled = true
@@ -520,6 +595,7 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
         Log.d("RequestTowFragment", "Car chip checked: ${binding.carChip.isChecked}")
         Log.d("RequestTowFragment", "Bike chip checked: ${binding.bikeChip.isChecked}")
         Log.d("RequestTowFragment", "Truck chip checked: ${binding.truckChip.isChecked}")
+        Log.d("RequestTowFragment", "Selected payment method: ${getSelectedPaymentMethod()}")
         Log.d("RequestTowFragment", "=== END VALIDATION TEST ===")
     }
     
@@ -870,6 +946,17 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             clearVehicleTypeError()
         }
         
+        // Validate payment method selection
+        if (selectedPaymentMethod == null) {
+            Log.d("RequestTowFragment", "Payment method is null")
+            showPaymentMethodError()
+            missingFields.add("Payment Method")
+            isValid = false
+        } else {
+            Log.d("RequestTowFragment", "Payment method is valid: $selectedPaymentMethod")
+            clearPaymentMethodError()
+        }
+        
         // Show specific error message if validation fails
         if (!isValid) {
             Log.d("RequestTowFragment", "Validation failed. Missing fields: $missingFields")
@@ -912,6 +999,7 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             missingFields.size == 1 -> "❌ Missing: ${missingFields.first()}"
             missingFields.size == 2 -> "❌ Missing: ${missingFields[0]} and ${missingFields[1]}"
             missingFields.size == 3 -> "❌ Missing: ${missingFields[0]}, ${missingFields[1]}, and ${missingFields[2]}"
+            missingFields.size == 4 -> "❌ Missing: ${missingFields[0]}, ${missingFields[1]}, ${missingFields[2]}, and ${missingFields[3]}"
             else -> getString(R.string.please_complete_fields)
         }
     }
@@ -988,6 +1076,10 @@ class RequestTowFragment : Fragment(), OnMapReadyCallback {
             binding.truckChip.isChecked -> "Truck"
             else -> null
         }
+    }
+    
+    private fun getSelectedPaymentMethod(): String? {
+        return selectedPaymentMethod
     }
 
     private fun checkLocationPermission(): Boolean {

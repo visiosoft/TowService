@@ -579,6 +579,221 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Payment Method Section -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/card_background"
+            app:strokeColor="@color/divider"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Section Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_credit_card"
+                        app:tint="@color/accent_blue"
+                        android:layout_marginEnd="12dp"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Payment Method"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:textColor="@color/text_primary"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Required"
+                        android:textSize="10sp"
+                        app:chipBackgroundColor="@color/accent_orange"
+                        app:chipStrokeColor="@color/accent_orange"
+                        app:chipStrokeWidth="1dp"
+                        android:textColor="@color/white"/>
+                </LinearLayout>
+
+                <!-- Payment Method Options -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Card Payment Option -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardPaymentCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="2dp"
+                        app:cardBackgroundColor="@color/background_secondary"
+                        app:strokeColor="@color/divider"
+                        app:strokeWidth="1dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="16dp"
+                            android:gravity="center_vertical">
+
+                            <!-- Card Icon -->
+                            <LinearLayout
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:background="@drawable/circle_bg"
+                                android:gravity="center"
+                                android:layout_marginEnd="16dp">
+
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:src="@drawable/ic_credit_card"
+                                    app:tint="@color/accent_blue"/>
+                            </LinearLayout>
+
+                            <!-- Card Details -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="💳 Credit/Debit Card"
+                                    android:textStyle="bold"
+                                    android:textSize="16sp"
+                                    android:textColor="@color/text_primary"
+                                    android:layout_marginBottom="4dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Secure payment with your card"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/text_secondary"/>
+                            </LinearLayout>
+
+                            <!-- Selection Indicator -->
+                            <ImageView
+                                android:id="@+id/cardPaymentCheck"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_check"
+                                app:tint="@color/accent_green"
+                                android:visibility="gone"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Cash Payment Option -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cashPaymentCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="2dp"
+                        app:cardBackgroundColor="@color/background_secondary"
+                        app:strokeColor="@color/divider"
+                        app:strokeWidth="1dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="16dp"
+                            android:gravity="center_vertical">
+
+                            <!-- Cash Icon -->
+                            <LinearLayout
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:background="@drawable/circle_bg"
+                                android:gravity="center"
+                                android:layout_marginEnd="16dp">
+
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:src="@drawable/ic_cash"
+                                    app:tint="@color/accent_green"/>
+                            </LinearLayout>
+
+                            <!-- Cash Details -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="💵 Cash Payment"
+                                    android:textStyle="bold"
+                                    android:textSize="16sp"
+                                    android:textColor="@color/text_primary"
+                                    android:layout_marginBottom="4dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Pay with cash to the driver"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/text_secondary"/>
+                            </LinearLayout>
+
+                            <!-- Selection Indicator -->
+                            <ImageView
+                                android:id="@+id/cashPaymentCheck"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_check"
+                                app:tint="@color/accent_green"
+                                android:visibility="gone"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+                <!-- Payment Method Error -->
+                <TextView
+                    android:id="@+id/paymentMethodError"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/missing_payment_method"
+                    android:textSize="12sp"
+                    android:textColor="@color/error_red"
+                    android:visibility="gone"
+                    android:layout_marginTop="8dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Request Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/requestButton"
